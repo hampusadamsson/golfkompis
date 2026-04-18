@@ -1,43 +1,127 @@
-'''
-from datetime import date, time from golfkompis.course import load_courses from golfkompis.mingolf import MinGolf
+# Golfkompis
 
-golf = MinGolf()
-golf_courses = golf.search_courses("Botkyrka") # [0]
-print(golf_courses)
-golf.login("900921-017", "088594")
-spots = golf.search_free_slots(
-course=golf_courses,
-date=date.fromisoformat("20250728"),
-n_slots_to_look_for=4,
-start_time=time(hour=8),
-stop_time=time(hour=15),
-)
-for t in spots:
-print(t.SlotTime, t.CourseName, t.CourseID)
+![logo](logo.png)
 
-reservation = golf.book_teetime(spots[0], [])
-print(reservation)
-cb = golf.cancel_booking(spots[0])
-assert cb.Deleted, cb.ErrorMessage
-'''
+Search for tee times at Swedish golf courses via MinGolf.
 
-'''
-from golfkompis.domain import Slot
-from golfkompis.mingolf import MinGolf
+Features:
 
-golf = MinGolf()
-spots = Slot.model_construct(
-SlotID="9712a4f1-5235-4ffd-be5b-ae2feecd0797",
-SlotTime="20250720T080000",
-CourseID="4bfc39cf-b2d2-4a32-ba81-a8db53e59bb2",
-ClubID="4fb14a3a-2135-4ae8-a302-0f7a38c93567",
-bookingCode="",
-MaximumNumberOfSlotBookingsPerSlot=1,
-OrganizationalunitID="",
-OrganizationalunitName="",
-reInitOnMissingBooking=True,
-failOnMissingBooking=False,
-)
-reservation = golf.book_teetime(spots, [])
-print(reservation)
-'''
+- Search tee slots across multiple courses simultaneously
+- Filter by time window and number of available spots
+- Times returned in Europe/Stockholm regardless of API timezone
+
+## Requirements
+
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv)
+
+## Install
+
+```bash
+uv sync
+```
+
+## CLI
+
+```
+uv run python src/cli.py
+```
+
+```
+Tee time search tool for MinGolf Sweden.
+
+USAGE
+  golfkompis <command> [flags]
+
+MAIN COMMANDS
+  find      Find available tee times at one or more courses
+  search    Search courses by club name
+  courses   List all available courses
+```
+
+### find
+
+Find available tee times for a given date, time window, and number of spots.
+
+```bash
+uv run python src/cli.py find \
+  --username 900922-018 \
+  --password '****' \
+  --date 2026-04-21 \
+  --start 08:00 \
+  --stop 12:00 \
+  --spots 4 \
+  --courses 98369cac-d4bb-4671-931f-db10201ba1a5
+```
+
+Multiple courses can be passed:
+
+```bash
+  --courses 98369cac-d4bb-4671-931f-db10201ba1a5 4bfc39cf-b2d2-4a32-ba81-a8db53e59bb2
+```
+
+Output is a JSON array of available slots:
+
+```json
+[
+  {
+    "id": "c06813eb-2927-4e3a-8b51-700f4af7b492",
+    "time": "2026-04-21T06:00:00",
+    "price": { "greenfee": 450 },
+    "flexColor": "None",
+    "nineHoleBookingAavailable": false,
+    "isLocked": false,
+    "availablity": {
+      "bookable": true,
+      "maxNumberOfSlotBookings": 4,
+      "numbersOfSlotBookings": 0,
+      "numberOfBlockedRows": 0,
+      "numberOfNineHoleSlotBookings": 0,
+      "availableSlots": 4
+    },
+    "playersInfo": [],
+    "reservationIds": [],
+    "startProhibitionIds": [],
+    "maximumHcpPerSlot": null
+  }
+]
+```
+
+### search
+
+Search for courses by club name.
+
+```bash
+uv run python src/cli.py search --name Botkyrka
+```
+
+### courses
+
+List all available courses.
+
+```bash
+uv run python src/cli.py courses
+```
+
+## MinGolf API reference
+
+### Login
+
+`POST https://mingolf.golf.se/login/api/Users/Login`
+
+```json
+{ "GolfId": "800222-027", "Password": "dummy123" }
+```
+
+### Course schedule
+
+`GET https://mingolf.golf.se/bokning/api/Clubs/{clubId}/CourseSchedule`
+
+Query params:
+
+- `courseId` — course UUID
+- `date` — `YYYY-MM-DD`
+
+Response shape: `CourseSchedule` (see `src/golfkompis/domain2.py`).
+
+Slot times are returned in UTC (`Z`). The CLI and filter layer convert them to `Europe/Stockholm` before applying any time window filter.
