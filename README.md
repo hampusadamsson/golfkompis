@@ -21,6 +21,16 @@ Features:
 uv sync
 ```
 
+## Development
+
+Install git hooks (one-time):
+
+```bash
+uv run pre-commit install
+```
+
+Hooks run ruff, basedpyright, and pytest on every commit.
+
 ## CLI
 
 ```
