@@ -16,22 +16,18 @@ from golfkompis.domain import (
     Profile,
     SlotBookingsView,
 )
+from golfkompis.endpoints import (
+    GET_CLUB_INFORMATION,
+    GET_COURSE_SCHEDULE,
+    GET_FRIEND_OVERVIEW,
+    GET_GOLF_CALENDAR,
+    GET_PROFILE,
+    LOGIN_URL,
+    SLOT_BOOKINGS,
+    SLOT_LOCK,
+)
 
 log = structlog.get_logger()  # pyright: ignore[reportAny]
-
-LOGIN_URL = "https://mingolf.golf.se/login/api/Users/Login"
-GET_CLUB_INFORMATION = "https://mingolf.golf.se/handlers/booking/GetClubInformation"
-GET_GOLF_CALENDAR = "https://mingolf.golf.se/start/api/Persons/GolfCalender"
-# Note: "GolfCalender" misspelling matches the actual API path.
-GET_COURSE_SCHEDULE = (
-    "https://mingolf.golf.se/bokning/api/Clubs/{club_id}/CourseSchedule"
-)
-SLOT_BOOKINGS = "https://mingolf.golf.se/bokning/api/Slot/{slot_id}/Bookings"
-SLOT_LOCK = "https://mingolf.golf.se/bokning/api/Slot/{slot_id}/Lock"
-GET_PROFILE = "https://mingolf.golf.se/login/api/profile"
-GET_FRIEND_OVERVIEW = (
-    "https://mingolf.golf.se/minainstallningar/favoriter/api/Persons/FriendOverview"
-)
 
 DEFAULT_TIMEOUT = 30  # seconds
 
