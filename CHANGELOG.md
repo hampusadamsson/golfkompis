@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/hampusadamsson/golfkompis/compare/golfkompis-v1.0.0...golfkompis-v1.0.1) (2026-04-26)
+
+
+### Documentation
+
+* added badges ([b6bf184](https://github.com/hampusadamsson/golfkompis/commit/b6bf1846a32ad631fec3555cea871ff0bbd295b0))
+* update ([143c422](https://github.com/hampusadamsson/golfkompis/commit/143c422cfef41c5b13aea8e4e86919f7614356e2))
+
 ## [1.0.0](https://github.com/hampusadamsson/golfkompis/compare/golfkompis-v0.1.0...golfkompis-v1.0.0) (2026-04-26)
 
 
