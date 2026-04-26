@@ -2,6 +2,10 @@
 
 ![logo](logo.png)
 
+[![Release Please](https://github.com/hampusadamsson/golfkompis/actions/workflows/release-please.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/release-please.yml)
+[![CI](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci.yml)
+[![Dependabot Updates](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates)
+
 Search for tee times at Swedish golf courses via MinGolf.
 
 Features:
@@ -211,10 +215,10 @@ Releases are automated via [release-please](https://github.com/googleapis/releas
 
 **Commit message prefixes that trigger version bumps:**
 
-| Prefix | Version bump |
-|---|---|
-| `fix:` | patch (`0.1.0` → `0.1.1`) |
-| `feat:` | minor (`0.1.0` → `0.2.0`) |
+| Prefix                                   | Version bump              |
+| ---------------------------------------- | ------------------------- |
+| `fix:`                                   | patch (`0.1.0` → `0.1.1`) |
+| `feat:`                                  | minor (`0.1.0` → `0.2.0`) |
 | `feat!:` or `BREAKING CHANGE:` in footer | major (`0.1.0` → `1.0.0`) |
 
 Commits prefixed with `chore:`, `test:`, or `ci:` are not surfaced in the changelog.
