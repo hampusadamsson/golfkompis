@@ -9,6 +9,7 @@ from datetime import date, time, timedelta
 from golfkompis import smart_filters
 from golfkompis.config import settings
 from golfkompis.course import load_courses
+from golfkompis.logging import configure_logging
 from golfkompis.mingolf import MinGolf
 
 MAIN_COMMANDS = {
@@ -350,6 +351,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    configure_logging(json_output=False)
     parser = build_parser()
     args = parser.parse_args()
 

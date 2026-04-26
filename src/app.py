@@ -1,5 +1,7 @@
 """FastAPI app for golfkompis - tee time search."""
 
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from datetime import date, time, timedelta
 from typing import Annotated
 
@@ -12,9 +14,17 @@ from pydantic import BaseModel
 from golfkompis import smart_filters
 from golfkompis.course import load_courses
 from golfkompis.domain import Booking, FriendOverview, Profile
+from golfkompis.logging import configure_logging
 from golfkompis.mingolf import MinGolf
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    configure_logging(json_output=True)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 _courses = load_courses()
 
