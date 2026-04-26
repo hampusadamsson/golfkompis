@@ -6,13 +6,19 @@
 [![CI](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci.yml)
 [![Dependabot Updates](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates)
 
-Search for tee times at Swedish golf courses via MinGolf.
-
-Features:
+Unofficial Python SDK for MinGolf — search and book tee times at Swedish golf courses via CLI or HTTP API.
 
 - Search tee slots across multiple courses simultaneously
 - Filter by time window and number of available spots
 - Times returned in Europe/Stockholm regardless of API timezone
+
+## Quickstart
+
+```bash
+uv sync
+cp .env.example .env   # edit with your MinGolf credentials
+uv run golfkompis find --date 2026-05-01 --course Botkyrka
+```
 
 ## Requirements
 
@@ -25,23 +31,26 @@ Features:
 uv sync
 ```
 
-## Development
+## Configuration
 
-Install git hooks (one-time):
+Credentials can be set as environment variables, in a `.env` file, or passed directly as CLI flags.
 
-```bash
-uv run pre-commit install
-```
+| Variable            | Required | Description                    |
+| ------------------- | -------- | ------------------------------ |
+| `MINGOLF_USERNAME`  | yes      | Golf-ID, format `YYMMDD-XXX`   |
+| `MINGOLF_PASSWORD`  | yes      | MinGolf password               |
 
-Hooks run ruff, basedpyright, and pytest on every commit.
+**Precedence:** CLI flag > environment variable > `.env`
+
+Copy `.env.example` to `.env` and fill in your credentials — the `.env` file is gitignored.
 
 ## CLI
 
-```
+```bash
 uv run golfkompis
 ```
 
-```
+```text
 Tee time manager tool for Min Golf Sweden.
 
 USAGE
@@ -58,72 +67,60 @@ MAIN COMMANDS
   friends     List your golfing friends
 ```
 
-Use `golfkompis <command> --help` for details on each command.
-
-### Credentials
-
-Credentials can be provided via flags, environment variables, or `.env`:
-
-```bash
-export MINGOLF_USERNAME=YYMMDD-XXX
-export MINGOLF_PASSWORD=yourpassword
-```
-
-Or pass inline:
-
-```bash
-uv run golfkompis find --username YYMMDD-XXX --password yourpassword ...
-```
+Use `golfkompis help <command>` or `golfkompis <command> --help` for details. Use `--version` to print the installed version.
 
 ### find
 
-Find available tee times for a given date, time window, and number of spots.
+Find available tee times for a given date, optional time window, and minimum number of spots.
 
 ```bash
+# By course UUID
 uv run golfkompis find \
   --date 2026-04-21 \
   --start 08:00 \
   --stop 12:00 \
   --spots 4 \
   --courses 98369cac-d4bb-4671-931f-db10201ba1a5
-```
 
-Multiple courses can be passed:
-
-```bash
+# Multiple UUIDs
+uv run golfkompis find --date 2026-04-21 \
   --courses 98369cac-d4bb-4671-931f-db10201ba1a5 4bfc39cf-b2d2-4a32-ba81-a8db53e59bb2
+
+# By name substring (comma-separated, combinable with --courses)
+uv run golfkompis find --date 2026-04-21 --course "Botkyrka,Haninge"
 ```
 
-Or search by name:
-
-```bash
-  --course Botkyrka
-```
-
-Output is a JSON array of available slots.
+Output is a JSON array of available slots. The `id` field of each slot is what `book` expects.
 
 ### book
 
-Book a slot by ID:
+Book a slot by ID.
+
+> ⚠ **Destructive** — books the slot immediately against your live MinGolf account. `--dry-run` is on the roadmap.
 
 ```bash
 uv run golfkompis book --slot-id <slot-id>
 ```
 
-### bookings
-
-List upcoming bookings:
-
-```bash
-uv run golfkompis bookings
-```
-
 ### cancel
 
-Cancel a booking by ID:
+Cancel a booking by ID.
+
+> ⚠ **Destructive** — cancels the booking immediately. `--dry-run` is on the roadmap.
 
 ```bash
 uv run golfkompis cancel --booking-id <booking-id>
+```
+
+Booking IDs appear in the output of `bookings`.
+
+### bookings
+
+List upcoming bookings (defaults to the next 10 weeks):
+
+```bash
+uv run golfkompis bookings
+uv run golfkompis bookings --to 2026-06-01
 ```
 
 ### history
@@ -131,8 +128,11 @@ uv run golfkompis cancel --booking-id <booking-id>
 List played rounds:
 
 ```bash
+uv run golfkompis history
 uv run golfkompis history --from 2025-01-01 --to 2025-12-31
 ```
+
+Both flags default to today −10 weeks and today respectively.
 
 ### courses
 
@@ -140,6 +140,7 @@ Search courses by name:
 
 ```bash
 uv run golfkompis courses --name Botkyrka
+uv run golfkompis courses --name Botkyrka --eighteen-only
 ```
 
 ### profile
@@ -160,11 +161,15 @@ uv run golfkompis friends
 
 ## HTTP API
 
-The FastAPI server exposes the same functionality over HTTP:
+Run the development server:
 
 ```bash
 uv run uvicorn golfkompis.app:app --reload
 ```
+
+Interactive docs at `http://localhost:8000/docs` (Swagger) and `/redoc`. Liveness probe at `/health`.
+
+### Auth
 
 Pass credentials via headers on every request:
 
@@ -173,35 +178,54 @@ X-Mingolf-Username: YYMMDD-XXX
 X-Mingolf-Password: yourpassword
 ```
 
-Interactive docs at `http://localhost:8000/docs`.
+> Credentials are validated against MinGolf on every request — no session is cached server-side. Avoid hammering the endpoint.
 
 ## Docker
 
 ```bash
 docker build -t golfkompis .
-docker run -p 8000:8000 golfkompis
+docker run --rm -p 8000:8000 --env-file .env golfkompis
+curl http://localhost:8000/health
 ```
 
-## MinGolf API reference
+The production image runs without `--reload`, as a non-root user, with a built-in healthcheck.
 
-### Login
+## Project layout
 
-`POST https://mingolf.golf.se/login/api/Users/Login`
-
-```json
-{ "GolfId": "800222-027", "Password": "dummy123" }
+```text
+src/golfkompis/
+├── __main__.py        CLI entrypoint dispatch
+├── cli.py             argparse subcommands
+├── app.py             FastAPI HTTP layer
+├── mingolf.py         MinGolf HTTP client
+├── domain.py          Pydantic models for API payloads
+├── smart_filters.py   Slot filtering (timezone, spots, time window)
+├── course.py          Local courses.json index
+├── endpoints.py       MinGolf URL constants
+├── config.py          Settings (env + .env)
+├── logging.py         structlog configuration
+└── resources/
+    └── courses.json   Bundled club/course catalogue
 ```
 
-### Course schedule
+Endpoint URLs and response models live in `src/golfkompis/endpoints.py` and `src/golfkompis/domain.py`.
 
-`GET https://mingolf.golf.se/bokning/api/Clubs/{clubId}/CourseSchedule`
+## Development
 
-Query params:
+Install git hooks (one-time):
 
-- `courseId` — course UUID
-- `date` — `YYYY-MM-DD`
+```bash
+uv run pre-commit install
+```
 
-Slot times are returned in UTC (`Z`). The CLI and filter layer convert them to `Europe/Stockholm` before applying any time window filter.
+Hooks run ruff, basedpyright, and pytest on every commit. To run checks manually:
+
+```bash
+uv run pytest -q
+uv run ruff check
+uv run ruff format
+uv run basedpyright
+```
 
 ## Releases
 
@@ -223,7 +247,6 @@ Releases are automated via [release-please](https://github.com/googleapis/releas
 
 Commits prefixed with `chore:`, `test:`, or `ci:` are not surfaced in the changelog.
 
-# NOTE Important!
+## Disclaimer
 
-I take no responsibility in how you use this software.
-Any use is at your own risk.
+Golfkompis is an **unofficial** client. It is not affiliated with, endorsed by, or supported by Svenska Golfförbundet, MinGolf, or any operator of the underlying API. The MinGolf API is undocumented and may change without notice. Use at your own risk — the author accepts no responsibility for misuse, rate-limiting, account suspension, or data loss.
