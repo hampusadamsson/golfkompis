@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
@@ -45,14 +46,50 @@ def filter_eligible_slots(
             return False
         if slot.availablity.availableSlots < min_spots:
             return False
-        dt = (
-            datetime.fromisoformat(slot.time)
-            .replace(tzinfo=_UTC)
-            .astimezone(_STOCKHOLM)
-        )
+        _dt = datetime.fromisoformat(slot.time)
+        if _dt.tzinfo is None:
+            _dt = _dt.replace(tzinfo=_UTC)
+        dt = _dt.astimezone(_STOCKHOLM)
         slot_time = dt.time()
         if start_time is not None and slot_time < start_time:
             return False
         return stop_time is None or slot_time <= stop_time
 
     return [slot for slot in schedule.slots if eligible(slot)]
+
+
+def filter(
+    schedule: list[CourseSchedule],
+    start_time: time | None,
+    stop_time: time | None,
+    spots: int,
+) -> list[Slot]:
+    """Filter multiple course schedules to eligible slots.
+
+    Applies ``filter_eligible_slots`` to each schedule in the list and
+    flattens the results into a single list of all matching slots.
+
+    Parameters
+    ----------
+    schedule:
+        List of course schedules to filter.
+    start_time:
+        Earliest acceptable tee-off time in Stockholm local time (inclusive).
+        None means no lower bound.
+    stop_time:
+        Latest acceptable tee-off time in Stockholm local time (inclusive).
+        None means no upper bound.
+    spots:
+        Minimum number of available spots required in a slot.
+
+    Returns
+    -------
+    list[Slot]
+        All slots across all schedules that are bookable, not locked,
+        have enough available spots, and fall within the requested time window.
+    """
+    return list(
+        itertools.chain.from_iterable(
+            [filter_eligible_slots(s, spots, start_time, stop_time) for s in schedule]
+        )
+    )

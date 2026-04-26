@@ -15,18 +15,15 @@ class Courses(BaseModel):
             gc_json = self.model_dump_json()
             _ = fn.write(str(gc_json))
 
-    def search(self, name: str) -> list[Course]:
-        return list(
-            filter(
-                lambda x: name.lower() in x.ClubName.lower() if x else "", self.courses
-            )
-        )
+    def search(self, name: str, only_18: bool = False) -> list[Course]:
+        res = list(filter(lambda x: name.lower() in x.ClubName.lower(), self.courses))
+        return list(filter(lambda x: not x.IsNineHoleCourse if only_18 else True, res))
 
     def get_uuid(self, uuid: str) -> Course:
         for course in self.courses:
-            if course and uuid.lower() == course.CourseID.lower():
+            if uuid.lower() == course.CourseID.lower():
                 return course
-        raise Exception(f"no such course with {uuid=}")
+        raise KeyError(f"no such course with {uuid=}")
 
 
 def load_courses() -> Courses:

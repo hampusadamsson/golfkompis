@@ -125,3 +125,8 @@ Query params:
 Response shape: `CourseSchedule` (see `src/golfkompis/domain2.py`).
 
 Slot times are returned in UTC (`Z`). The CLI and filter layer convert them to `Europe/Stockholm` before applying any time window filter.
+
+# NOTE Important!
+
+I take no responsibility in how you use this software.
+Any use is at your own risk.
