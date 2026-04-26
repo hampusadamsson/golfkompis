@@ -47,6 +47,14 @@ class MinGolf:
     def __init__(self, session: requests.Session | None = None) -> None:
         self.session = session or requests.Session()
         self.session.headers.update(_default_headers())
+        self._authenticated: bool = False
+
+    def _require_login(self) -> None:
+        """Raise RuntimeError if not logged in."""
+        if not self._authenticated:
+            raise RuntimeError(
+                "not authenticated - call login() before making API requests"
+            )
 
     def login(self, username: str, password: str) -> None:
         """Login to MinGolf. Must be called once before any API requests that require auth.
@@ -73,6 +81,7 @@ class MinGolf:
             raise ValueError(
                 f"MinGolf login rejected: {body.get('Message', 'unknown error') if isinstance(body, dict) else body}"  # pyright: ignore[reportUnknownMemberType]
             )
+        self._authenticated = True
 
     def fetch_course_schedule(self, course: Course, date: date) -> CourseSchedule:
         """Fetch the full course schedule for a given course and date.
@@ -93,6 +102,7 @@ class MinGolf:
             On non-2xx HTTP response.
         """
         # TODO: add Sweetspot support
+        self._require_login()
         url = GET_COURSE_SCHEDULE.format(club_id=course.ClubID)
         params = {
             "courseId": course.CourseID,
@@ -140,6 +150,7 @@ class MinGolf:
         stop_time:
             Latest acceptable tee-off time in Stockholm local time (inclusive).
         """
+        self._require_login()
         log.info(
             "finding_available_slots",
             courses=[c.CourseName for c in courses],
@@ -182,6 +193,7 @@ class MinGolf:
         requests.HTTPError
             On any non-2xx HTTP response.
         """
+        self._require_login()
         profile = self.fetch_profile()
 
         # Step 1: acquire lock
@@ -290,6 +302,7 @@ class MinGolf:
             On non-2xx HTTP response.
         """
         params = {"from": from_date.isoformat(), "to": to_date.isoformat()}
+        self._require_login()
         r = self.session.get(GET_GOLF_CALENDAR, params=params, timeout=DEFAULT_TIMEOUT)
         r.raise_for_status()
         return GolfCalendar.model_validate(r.json())
@@ -339,6 +352,7 @@ class MinGolf:
             On non-2xx HTTP response.
         """
         url = SLOT_BOOKINGS.format(slot_id=slot_id)
+        self._require_login()
         params = {
             "clubId": club_id,
             "courseId": course_id,
@@ -378,6 +392,7 @@ class MinGolf:
         requests.HTTPError
             On non-2xx HTTP response.
         """
+        self._require_login()
         today = date.today()
         bookings = self.fetch_bookings(today, today + timedelta(weeks=10))
         booking = next(
@@ -429,6 +444,7 @@ class MinGolf:
         requests.HTTPError
             On non-2xx HTTP response (e.g. 401 if not logged in).
         """
+        self._require_login()
         r = self.session.get(GET_PROFILE, timeout=DEFAULT_TIMEOUT)
         r.raise_for_status()
         return Profile.model_validate(r.json())
@@ -444,6 +460,7 @@ class MinGolf:
         requests.HTTPError
             On non-2xx HTTP response (e.g. 401 if not logged in).
         """
+        self._require_login()
         r = self.session.get(GET_FRIEND_OVERVIEW, timeout=DEFAULT_TIMEOUT)
         r.raise_for_status()
         return FriendOverview.model_validate(r.json())
