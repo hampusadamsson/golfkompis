@@ -45,6 +45,9 @@ include = ["src"]
 pythonVersion = "3.13"
 typeCheckingMode = "strict"
 
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

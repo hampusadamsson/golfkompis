@@ -24,7 +24,7 @@ repos:
 
       - id: pytest
         name: pytest
-        entry: uv run pytest src/tests/ -q
+        entry: bash -c 'uv run pytest src/tests/ -q || [ $? -eq 5 ]'
         language: system
         pass_filenames: false
         types_or: [python, pyi]
