@@ -12,7 +12,7 @@ Features:
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.13
 - [uv](https://github.com/astral-sh/uv)
 
 ## Install
@@ -34,19 +34,41 @@ Hooks run ruff, basedpyright, and pytest on every commit.
 ## CLI
 
 ```
-uv run python src/cli.py
+uv run golfkompis
 ```
 
 ```
-Tee time search tool for MinGolf Sweden.
+Tee time manager tool for Min Golf Sweden.
 
 USAGE
   golfkompis <command> [flags]
 
 MAIN COMMANDS
-  find      Find available tee times at one or more courses
-  search    Search courses by club name
-  courses   List all available courses
+  find        Find available tee times at one or more courses
+  book        Book a tee time by slot ID
+  bookings    List your upcoming bookings
+  history     List your played rounds
+  cancel      Cancel a booked tee time
+  courses     Search and list courses
+  profile     Fetch the logged-in user's MinGolf profile
+  friends     List your golfing friends
+```
+
+Use `golfkompis <command> --help` for details on each command.
+
+### Credentials
+
+Credentials can be provided via flags, environment variables, or `.env`:
+
+```bash
+export MINGOLF_USERNAME=YYMMDD-XXX
+export MINGOLF_PASSWORD=yourpassword
+```
+
+Or pass inline:
+
+```bash
+uv run golfkompis find --username YYMMDD-XXX --password yourpassword ...
 ```
 
 ### find
@@ -54,9 +76,7 @@ MAIN COMMANDS
 Find available tee times for a given date, time window, and number of spots.
 
 ```bash
-uv run python src/cli.py find \
-  --username 900922-018 \
-  --password '****' \
+uv run golfkompis find \
   --date 2026-04-21 \
   --start 08:00 \
   --stop 12:00 \
@@ -70,47 +90,92 @@ Multiple courses can be passed:
   --courses 98369cac-d4bb-4671-931f-db10201ba1a5 4bfc39cf-b2d2-4a32-ba81-a8db53e59bb2
 ```
 
-Output is a JSON array of available slots:
-
-```json
-[
-  {
-    "id": "c06813eb-2927-4e3a-8b51-700f4af7b492",
-    "time": "2026-04-21T06:00:00",
-    "price": { "greenfee": 450 },
-    "flexColor": "None",
-    "nineHoleBookingAavailable": false,
-    "isLocked": false,
-    "availablity": {
-      "bookable": true,
-      "maxNumberOfSlotBookings": 4,
-      "numbersOfSlotBookings": 0,
-      "numberOfBlockedRows": 0,
-      "numberOfNineHoleSlotBookings": 0,
-      "availableSlots": 4
-    },
-    "playersInfo": [],
-    "reservationIds": [],
-    "startProhibitionIds": [],
-    "maximumHcpPerSlot": null
-  }
-]
-```
-
-### search
-
-Search for courses by club name.
+Or search by name:
 
 ```bash
-uv run python src/cli.py search --name Botkyrka
+  --course Botkyrka
+```
+
+Output is a JSON array of available slots.
+
+### book
+
+Book a slot by ID:
+
+```bash
+uv run golfkompis book --slot-id <slot-id>
+```
+
+### bookings
+
+List upcoming bookings:
+
+```bash
+uv run golfkompis bookings
+```
+
+### cancel
+
+Cancel a booking by ID:
+
+```bash
+uv run golfkompis cancel --booking-id <booking-id>
+```
+
+### history
+
+List played rounds:
+
+```bash
+uv run golfkompis history --from 2025-01-01 --to 2025-12-31
 ```
 
 ### courses
 
-List all available courses.
+Search courses by name:
 
 ```bash
-uv run python src/cli.py courses
+uv run golfkompis courses --name Botkyrka
+```
+
+### profile
+
+Fetch your MinGolf profile:
+
+```bash
+uv run golfkompis profile
+```
+
+### friends
+
+List your golfing friends:
+
+```bash
+uv run golfkompis friends
+```
+
+## HTTP API
+
+The FastAPI server exposes the same functionality over HTTP:
+
+```bash
+uv run uvicorn golfkompis.app:app --reload
+```
+
+Pass credentials via headers on every request:
+
+```
+X-Mingolf-Username: YYMMDD-XXX
+X-Mingolf-Password: yourpassword
+```
+
+Interactive docs at `http://localhost:8000/docs`.
+
+## Docker
+
+```bash
+docker build -t golfkompis .
+docker run -p 8000:8000 golfkompis
 ```
 
 ## MinGolf API reference
@@ -131,8 +196,6 @@ Query params:
 
 - `courseId` — course UUID
 - `date` — `YYYY-MM-DD`
-
-Response shape: `CourseSchedule` (see `src/golfkompis/domain2.py`).
 
 Slot times are returned in UTC (`Z`). The CLI and filter layer convert them to `Europe/Stockholm` before applying any time window filter.
 

@@ -4,27 +4,25 @@ All constants are format strings where applicable; use `.format(...)` to
 substitute path parameters before calling.
 """
 
+_BASE = "https://mingolf.golf.se"
+
 # --- Auth ---
-LOGIN_URL = "https://mingolf.golf.se/login/api/Users/Login"
+LOGIN_URL = f"{_BASE}/login/api/Users/Login"
 
 # --- Profile ---
-GET_PROFILE = "https://mingolf.golf.se/login/api/profile"
+GET_PROFILE = f"{_BASE}/login/api/profile"
 
 # --- Club / course ---
-GET_CLUB_INFORMATION = "https://mingolf.golf.se/handlers/booking/GetClubInformation"
-GET_COURSE_SCHEDULE = (
-    "https://mingolf.golf.se/bokning/api/Clubs/{club_id}/CourseSchedule"
-)
+GET_CLUB_INFORMATION = f"{_BASE}/handlers/booking/GetClubInformation"
+GET_COURSE_SCHEDULE = f"{_BASE}/bokning/api/Clubs/{{club_id}}/CourseSchedule"
 
 # --- Calendar ---
 # Note: "GolfCalender" misspelling matches the actual API path.
-GET_GOLF_CALENDAR = "https://mingolf.golf.se/start/api/Persons/GolfCalender"
+GET_GOLF_CALENDAR = f"{_BASE}/start/api/Persons/GolfCalender"
 
 # --- Slot ---
-SLOT_BOOKINGS = "https://mingolf.golf.se/bokning/api/Slot/{slot_id}/Bookings"
-SLOT_LOCK = "https://mingolf.golf.se/bokning/api/Slot/{slot_id}/Lock"
+SLOT_BOOKINGS = f"{_BASE}/bokning/api/Slot/{{slot_id}}/Bookings"
+SLOT_LOCK = f"{_BASE}/bokning/api/Slot/{{slot_id}}/Lock"
 
 # --- Social ---
-GET_FRIEND_OVERVIEW = (
-    "https://mingolf.golf.se/minainstallningar/favoriter/api/Persons/FriendOverview"
-)
+GET_FRIEND_OVERVIEW = f"{_BASE}/minainstallningar/favoriter/api/Persons/FriendOverview"

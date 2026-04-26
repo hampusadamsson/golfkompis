@@ -23,8 +23,6 @@ MAIN_COMMANDS = {
     "friends": "List your golfing friends",
 }
 
-DEFAULT_RANGE_WEEKS = 10
-
 OTHER_COMMANDS = {
     "help": "Show help for a command",
 }
@@ -130,7 +128,7 @@ def cmd_bookings(args: argparse.Namespace) -> None:
     to_date = (
         date.fromisoformat(args.to_date)  # pyright: ignore[reportAny]
         if args.to_date  # pyright: ignore[reportAny]
-        else date.today() + timedelta(weeks=DEFAULT_RANGE_WEEKS)
+        else date.today() + timedelta(weeks=settings.default_range_weeks)
     )
     username, password = _require_credentials(args)
 
@@ -144,7 +142,7 @@ def cmd_history(args: argparse.Namespace) -> None:
     from_date = (
         date.fromisoformat(args.from_date)  # pyright: ignore[reportAny]
         if args.from_date  # pyright: ignore[reportAny]
-        else date.today() - timedelta(weeks=DEFAULT_RANGE_WEEKS)
+        else date.today() - timedelta(weeks=settings.default_range_weeks)
     )
     to_date = date.fromisoformat(args.to_date) if args.to_date else date.today()  # pyright: ignore[reportAny]
     username, password = _require_credentials(args)

@@ -6,16 +6,18 @@ from datetime import date, time, timedelta
 from typing import Annotated
 
 import requests
-import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from golfkompis import smart_filters
-from golfkompis.course import load_courses
+from golfkompis.config import settings
+from golfkompis.course import Courses, load_courses
 from golfkompis.domain import Booking, FriendOverview, Profile
 from golfkompis.logging import configure_logging
 from golfkompis.mingolf import MinGolf
+
+_courses: Courses = load_courses()
 
 
 @asynccontextmanager
@@ -25,10 +27,6 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
 
 
 app = FastAPI(lifespan=lifespan)
-
-_courses = load_courses()
-
-DEFAULT_RANGE_WEEKS = 10
 
 
 # ---------------------------------------------------------------------------
@@ -44,6 +42,16 @@ async def http_error_handler(
         status_code=502,
         content={"detail": f"MinGolf API error: {exc}"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 # ---------------------------------------------------------------------------
@@ -127,14 +135,14 @@ def bookings(
 ):
     """List the user's upcoming bookings.
 
-    `from` is fixed to today. `to` defaults to today + 10 weeks.
+    `from` is fixed to today. `to` defaults to today + configured range weeks.
 
     Credentials are passed via request headers:
       X-Mingolf-Username: Golf-ID (YYMMDD-XXX)
       X-Mingolf-Password: MinGolf password
     """
     from_date = date.today()
-    to_date = to or (date.today() + timedelta(weeks=DEFAULT_RANGE_WEEKS))
+    to_date = to or (date.today() + timedelta(weeks=settings.default_range_weeks))
     return golf.fetch_bookings(from_date, to_date)
 
 
@@ -160,13 +168,13 @@ def history(
 ):
     """List the user's played rounds.
 
-    `from` defaults to today - 10 weeks. `to` defaults to today.
+    `from` defaults to today - configured range weeks. `to` defaults to today.
 
     Credentials are passed via request headers:
       X-Mingolf-Username: Golf-ID (YYMMDD-XXX)
       X-Mingolf-Password: MinGolf password
     """
-    from_date = from_ or (date.today() - timedelta(weeks=DEFAULT_RANGE_WEEKS))
+    from_date = from_ or (date.today() - timedelta(weeks=settings.default_range_weeks))
     to_date = to or date.today()
     return golf.fetch_calendar(from_date, to_date).playedRounds
 
@@ -199,7 +207,3 @@ def friends(golf: GolfClient):
       X-Mingolf-Password: MinGolf password
     """
     return golf.fetch_friends()
-
-
-if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
