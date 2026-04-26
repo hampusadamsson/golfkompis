@@ -1,6 +1,7 @@
 """This is the cli version of the golfkompis app."""
 
 import argparse
+import importlib.metadata
 import json
 import sys
 from datetime import date, time, timedelta
@@ -28,7 +29,7 @@ OTHER_COMMANDS = {
 }
 
 
-def print_root_help():
+def print_root_help() -> None:
     print("Tee time manager tool for Min Golf Sweden.")
     print()
     print("USAGE")
@@ -73,8 +74,42 @@ def cmd_courses(args: argparse.Namespace) -> None:
 
 
 def cmd_find(args: argparse.Namespace) -> None:
-    courses = load_courses()
-    courses_list = [courses.get_uuid(uuid) for uuid in args.courses]  # pyright: ignore[reportAny]
+    all_courses = load_courses()
+
+    # Collect courses from UUIDs (--courses) and name patterns (--course).
+    uuid_list: list[str] = args.courses or []  # pyright: ignore[reportAny]
+    name_csv: str = args.course or ""  # pyright: ignore[reportAny]
+
+    courses_list = [all_courses.get_uuid(uuid) for uuid in uuid_list]
+
+    if name_csv:
+        for name_part in name_csv.split(","):
+            name_part = name_part.strip()
+            if name_part:
+                matched = all_courses.search(name_part)
+                if not matched:
+                    print(
+                        f"Warning: no courses matched name '{name_part}'",
+                        file=sys.stderr,
+                    )
+                courses_list.extend(matched)
+
+    # Deduplicate while preserving order.
+    from golfkompis.domain import Course
+
+    seen: set[str] = set()
+    unique_courses: list[Course] = []
+    for c in courses_list:
+        if c.CourseID not in seen:
+            seen.add(c.CourseID)
+            unique_courses.append(c)
+
+    if not unique_courses:
+        print(
+            "Error: no courses selected. Use --courses UUID or --course NAME.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     search_date = date.fromisoformat(args.date)  # pyright: ignore[reportAny]
     start_time = time.fromisoformat(args.start) if args.start else None  # pyright: ignore[reportAny]
@@ -84,10 +119,7 @@ def cmd_find(args: argparse.Namespace) -> None:
 
     golf = MinGolf()
     golf.login(username, password)
-    schedule = golf.find_available_slots(
-        courses_list,
-        search_date,
-    )
+    schedule = golf.find_available_slots(unique_courses, search_date)
     slots = smart_filters.filter(schedule, start_time, stop_time, args.spots)  # pyright: ignore[reportAny]
     print(json.dumps([s.model_dump() for s in slots], indent=2, ensure_ascii=False))
 
@@ -152,7 +184,25 @@ def cmd_friends(args: argparse.Namespace) -> None:
     print(json.dumps(overview.model_dump(), indent=2, ensure_ascii=False))
 
 
+def _auth_parser() -> argparse.ArgumentParser:
+    """Shared parent parser that injects --username and --password."""
+    p = argparse.ArgumentParser(add_help=False)
+    p.add_argument(
+        "--username",
+        default=None,
+        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
+    )
+    p.add_argument(
+        "--password",
+        default=None,
+        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
+    )
+    return p
+
+
 def build_parser() -> argparse.ArgumentParser:
+    auth = _auth_parser()
+
     parser = argparse.ArgumentParser(
         prog="golfkompis",
         add_help=False,  # we handle help manually
@@ -160,23 +210,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-h", "--help", action="store_true", help="Show this help message."
     )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {importlib.metadata.version('golfkompis')}",
+        help="Show version and exit.",
+    )
     sub = parser.add_subparsers(dest="command")
 
     # book
     p_book = sub.add_parser(
         "book",
+        parents=[auth],
         description="Book a tee time by slot ID.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_book.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_book.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
     p_book.add_argument(
         "--slot-id",
@@ -188,18 +235,9 @@ def build_parser() -> argparse.ArgumentParser:
     # find
     p_find = sub.add_parser(
         "find",
+        parents=[auth],
         description="Find available tee times at one or more courses.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_find.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_find.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
     p_find.add_argument("--date", required=True, help="Date to search (YYYY-MM-DD).")
     p_find.add_argument("--start", default=None, help="Earliest tee time (HH:MM).")
@@ -209,10 +247,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_find.add_argument(
         "--courses",
-        required=True,
+        default=None,
         nargs="+",
         metavar="UUID",
         help="One or more course UUIDs.",
+    )
+    p_find.add_argument(
+        "--course",
+        default=None,
+        metavar="NAME",
+        help=(
+            "Comma-separated list of course name substrings to match, e.g. "
+            "'Botkyrka,Haninge'. All matching courses are included. "
+            "Can be combined with --courses."
+        ),
     )
 
     # search courses
@@ -237,18 +285,9 @@ def build_parser() -> argparse.ArgumentParser:
     # bookings
     p_bookings = sub.add_parser(
         "bookings",
+        parents=[auth],
         description="List your upcoming bookings.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_bookings.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_bookings.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
     p_bookings.add_argument(
         "--to",
@@ -260,18 +299,9 @@ def build_parser() -> argparse.ArgumentParser:
     # history
     p_history = sub.add_parser(
         "history",
+        parents=[auth],
         description="List your played rounds.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_history.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_history.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
     p_history.add_argument(
         "--from",
@@ -289,18 +319,9 @@ def build_parser() -> argparse.ArgumentParser:
     # cancel
     p_cancel = sub.add_parser(
         "cancel",
+        parents=[auth],
         description="Cancel a booked tee time by booking id.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_cancel.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_cancel.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
     p_cancel.add_argument(
         "--booking-id",
@@ -310,52 +331,34 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # profile
-    p_profile = sub.add_parser(
+    sub.add_parser(
         "profile",
+        parents=[auth],
         description="Fetch the logged-in user's MinGolf profile.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p_profile.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_profile.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
-    )
 
     # friends
-    p_friends = sub.add_parser(
+    sub.add_parser(
         "friends",
+        parents=[auth],
         description="List your golfing friends.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    p_friends.add_argument(
-        "--username",
-        default=None,
-        help="Golf-ID (YYMMDD-XXX). Overrides MINGOLF_USERNAME env var.",
-    )
-    p_friends.add_argument(
-        "--password",
-        default=None,
-        help="MinGolf password. Overrides MINGOLF_PASSWORD env var.",
     )
 
     return parser
 
 
-def main():
+def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    # no command or explicit --help → print root help
-    if not args.command or args.help:
+    # no command or explicit --help -> print root help
+    if not args.command or args.help:  # pyright: ignore[reportAny]
         print_root_help()
         sys.exit(0)
 
-    if args.command == "help":
+    if args.command == "help":  # pyright: ignore[reportAny]
         topic = getattr(args, "topic", None)
         if topic:
             parser.parse_args([topic, "--help"])
@@ -364,21 +367,21 @@ def main():
         sys.exit(0)
 
     try:
-        if args.command == "courses":
+        if args.command == "courses":  # pyright: ignore[reportAny]
             cmd_courses(args)
-        elif args.command == "find":
+        elif args.command == "find":  # pyright: ignore[reportAny]
             cmd_find(args)
-        elif args.command == "book":
+        elif args.command == "book":  # pyright: ignore[reportAny]
             cmd_book(args)
-        elif args.command == "bookings":
+        elif args.command == "bookings":  # pyright: ignore[reportAny]
             cmd_bookings(args)
-        elif args.command == "history":
+        elif args.command == "history":  # pyright: ignore[reportAny]
             cmd_history(args)
-        elif args.command == "cancel":
+        elif args.command == "cancel":  # pyright: ignore[reportAny]
             cmd_cancel(args)
-        elif args.command == "profile":
+        elif args.command == "profile":  # pyright: ignore[reportAny]
             cmd_profile(args)
-        elif args.command == "friends":
+        elif args.command == "friends":  # pyright: ignore[reportAny]
             cmd_friends(args)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
