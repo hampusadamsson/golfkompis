@@ -126,6 +126,26 @@ Response shape: `CourseSchedule` (see `src/golfkompis/domain2.py`).
 
 Slot times are returned in UTC (`Z`). The CLI and filter layer convert them to `Europe/Stockholm` before applying any time window filter.
 
+## Releases
+
+Releases are automated via [release-please](https://github.com/googleapis/release-please). The version in `pyproject.toml` and `CHANGELOG.md` are kept in sync automatically.
+
+**How it works:**
+
+1. Merge commits to `main` following [Conventional Commits](https://www.conventionalcommits.org/).
+2. Release-please opens a `chore: release X.Y.Z` PR containing the changelog and version bump.
+3. Merging that PR creates the git tag (`vX.Y.Z`) and publishes a GitHub release.
+
+**Commit message prefixes that trigger version bumps:**
+
+| Prefix | Version bump |
+|---|---|
+| `fix:` | patch (`0.1.0` → `0.1.1`) |
+| `feat:` | minor (`0.1.0` → `0.2.0`) |
+| `feat!:` or `BREAKING CHANGE:` in footer | major (`0.1.0` → `1.0.0`) |
+
+Commits prefixed with `chore:`, `test:`, or `ci:` are not surfaced in the changelog.
+
 # NOTE Important!
 
 I take no responsibility in how you use this software.
