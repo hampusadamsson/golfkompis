@@ -1,22 +1,36 @@
-# Use an official Python image as the base
-FROM python:3.13-slim
+# Build stage: install dependencies only (for layer caching)
+FROM python:3.13-slim AS builder
 
-# Set working directory
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
 WORKDIR /app
 
-# Install pip and uv (a Python packaging tool by Astral)
-RUN pip install --upgrade pip \
-    && pip install uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
 
-# Copy project files into the container
+# Runtime stage
+FROM python:3.13-slim
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+WORKDIR /app
+
+# Non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Copy virtualenv from builder and project source
+COPY --from=builder /app/.venv /app/.venv
 COPY pyproject.toml uv.lock ./
 COPY src ./src
 
-# Install dependencies using uv
-RUN uv sync
+RUN uv sync --frozen --no-dev
 
-# Expose the application port
+RUN chown -R appuser:appgroup /app
+USER appuser
+
 EXPOSE 8000
 
-# Set the command to run the application
-CMD ["uv", "run", "src/app.py"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+
+CMD ["uv", "run", "uvicorn", "golfkompis.app:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -7,6 +7,7 @@ requires-python = "==3.13.*"
 dependencies = [
   "fastapi>=0.115.12",
   "pydantic>=2.11.5",
+  "pydantic-settings>=2.6.0",
   "requests>=2.32.4",
   "structlog>=25.5.0",
   "uvicorn>=0.34.3",
@@ -17,9 +18,10 @@ golfkompis = "golfkompis.__main__:main"
 
 [dependency-groups]
 dev = [
-    "basedpyright>=1.39.2",
-    "pytest>=8.4.1",
-    "ruff>=0.15.11",
+  "basedpyright>=1.39.2",
+  "pre-commit>=4.0.0",
+  "pytest>=8.4.1",
+  "ruff>=0.15.11",
 ]
 
 [tool.ruff]
@@ -30,9 +32,9 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
 ignore = [
-    "N815",   # camelCase field names are required to match MinGolf API responses
-    "B008",   # FastAPI Query() in function defaults is the intended pattern
-    "E501",   # Long lines (URLs, docstrings) — not worth breaking
+  "N815", # camelCase field names are required to match MinGolf API responses
+  "B008", # FastAPI Query() in function defaults is the intended pattern
+  "E501", # Long lines (URLs, docstrings) — not worth breaking
 ]
 
 [tool.ruff.lint.isort]
@@ -41,7 +43,10 @@ known-first-party = ["golfkompis"]
 [tool.basedpyright]
 include = ["src"]
 pythonVersion = "3.13"
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
 
 [build-system]
 requires = ["hatchling"]
