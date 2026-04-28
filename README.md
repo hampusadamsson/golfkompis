@@ -210,6 +210,7 @@ X-Mingolf-Password: yourpassword
 | `DELETE` | `/api/v1/bookings/{booking_id}` | ✓ | Cancel a booking |
 | `GET` | `/api/v1/history` | ✓ | List played rounds |
 | `GET` | `/api/v1/course/search` | — | Search course catalogue |
+| `GET` | `/api/v1/course/list` | — | List all courses (no pagination) |
 | `GET` | `/api/v1/profile` | ✓ | Fetch user profile |
 | `GET` | `/api/v1/friends` | ✓ | Fetch friend overview |
 
@@ -322,6 +323,28 @@ curl "http://localhost:8000/api/v1/course/search?course=Botkyrka"
 ```
 
 > The catalogue is a bundled snapshot (`resources/courses.json`) and may be slightly stale.
+
+---
+
+#### `GET /api/v1/course/list`
+
+Return every course in the bundled catalogue. No auth required, no pagination.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `only_18` | `bool` | no | Exclude 9-hole courses (default `false`) |
+
+Returns `list[Course]`. Response can be several hundred KB — clients should cache the result.
+
+```bash
+# all courses
+curl http://localhost:8000/api/v1/course/list | jq 'length'
+
+# 18-hole only
+curl "http://localhost:8000/api/v1/course/list?only_18=true" | jq 'length'
+```
+
+> `CourseID` values from this endpoint are usable as `courses` in `/booking/find`.
 
 ---
 

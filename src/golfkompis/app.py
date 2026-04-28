@@ -547,6 +547,39 @@ def search(
 
 
 @app.get(
+    "/api/v1/course/list",
+    tags=["courses"],
+    summary="List all courses",
+    response_model=list[Course],
+)
+def list_courses(
+    courses_cat: CourseCatalogue,
+    only_18: bool = Query(False, description="If true, exclude 9-hole courses."),
+) -> list[Course]:
+    """Return the full bundled course catalogue.
+
+    No authentication required. The catalogue is a snapshot bundled at
+    ``src/golfkompis/resources/courses.json`` and may be slightly stale.
+    Returns every entry \u2014 no pagination, no limit.
+
+    Parameters
+    ----------
+    courses_cat:
+        Local course catalogue (injected from app state).
+    only_18:
+        If ``True``, exclude 9-hole courses.
+
+    Returns
+    -------
+    list[Course]
+        All courses in the bundled catalogue.
+    """
+    if only_18:
+        return [c for c in courses_cat.courses if not c.IsNineHoleCourse]
+    return courses_cat.courses
+
+
+@app.get(
     "/api/v1/profile",
     tags=["profile"],
     summary="Fetch user profile",
