@@ -1,0 +1,38 @@
+[
+  {
+    "clubId": "mock-club-0001",
+    "clubName": "Mock Golf Club",
+    "courseId": "mock-course-0001",
+    "courseName": "Mock 18",
+    "slotId": "mock-slot-past-0001",
+    "slotTime": "2025-03-15T09:00:00",
+    "slotTimeAsDate": "2025-03-15",
+    "bookingInfo": {
+      "bookingId": "mock-booking-past-0001",
+      "players": [
+        { "hcp": "13.1", "gender": "M", "personId": "mock-person-0001", "name": "Mock Player" }
+      ],
+      "hcpResult": "13.1",
+      "points": 34
+    },
+    "roundType": "golf"
+  },
+  {
+    "clubId": "mock-club-0001",
+    "clubName": "Mock Golf Club",
+    "courseId": "mock-course-0001",
+    "courseName": "Mock 18",
+    "slotId": "mock-slot-past-0002",
+    "slotTime": "2025-04-22T11:00:00",
+    "slotTimeAsDate": "2025-04-22",
+    "bookingInfo": {
+      "bookingId": "mock-booking-past-0002",
+      "players": [
+        { "hcp": "12.8", "gender": "M", "personId": "mock-person-0001", "name": "Mock Player" }
+      ],
+      "hcpResult": "12.8",
+      "points": 36
+    },
+    "roundType": "golf"
+  }
+]

@@ -39,6 +39,7 @@ Credentials can be set as environment variables, in a `.env` file, or passed dir
 | ------------------- | -------- | ------------------------------ |
 | `MINGOLF_USERNAME`  | yes      | Golf-ID, format `YYMMDD-XXX`   |
 | `MINGOLF_PASSWORD`  | yes      | MinGolf password               |
+| `MOCK`              | no       | Set to `1` or `true` to enable mock mode (no MinGolf calls) |
 
 **Precedence:** CLI flag > environment variable > `.env`
 
@@ -168,6 +169,23 @@ uv run uvicorn golfkompis.app:app --reload
 ```
 
 Interactive docs at `http://localhost:8000/docs` (Swagger) and `/redoc`.
+
+### Mock mode (no MinGolf credentials needed)
+
+Set `MOCK=1` to serve canned fixture data instead of calling MinGolf:
+
+```bash
+MOCK=1 uv run uvicorn golfkompis.app:app --reload
+```
+
+Or add `MOCK=true` to your `.env` file.
+
+In mock mode:
+- `X-Mingolf-*` headers are **not required** and are ignored.
+- All read endpoints return fixture data from `src/golfkompis/fixtures/`.
+- All write endpoints (`POST /booking`, `DELETE /bookings/{id}`) always return `204`.
+- `/api/v1/course/search` still uses the real bundled catalogue.
+- Fixtures are validated against Pydantic models at startup — a corrupted fixture fails loudly.
 
 ### Auth
 

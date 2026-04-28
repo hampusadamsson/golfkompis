@@ -1,0 +1,54 @@
+{
+  "friends": [
+    {
+      "personId": "mock-person-0002",
+      "golfId": "800202-002",
+      "firstName": "Friend",
+      "lastName": "Alpha",
+      "fullName": "Friend Alpha",
+      "hcp": "8.2",
+      "age": 45,
+      "gender": "M",
+      "isBooker": false,
+      "homeClub": "Mock Golf Club",
+      "isGuest": false,
+      "tee": { "saveAsDefault": false },
+      "country": null,
+      "imageUrl": null
+    },
+    {
+      "personId": "mock-person-0003",
+      "golfId": "850303-003",
+      "firstName": "Friend",
+      "lastName": "Beta",
+      "fullName": "Friend Beta",
+      "hcp": "20.1",
+      "age": 40,
+      "gender": "F",
+      "isBooker": false,
+      "homeClub": null,
+      "isGuest": false,
+      "tee": { "saveAsDefault": false },
+      "country": null,
+      "imageUrl": null
+    }
+  ],
+  "reversedFriends": [
+    {
+      "personId": "mock-person-0004",
+      "golfId": "900404-004",
+      "firstName": "Follower",
+      "lastName": "Gamma",
+      "fullName": "Follower Gamma",
+      "hcp": "15.0",
+      "age": 35,
+      "gender": "M",
+      "isBooker": false,
+      "homeClub": null,
+      "isGuest": false,
+      "tee": { "saveAsDefault": false },
+      "country": null,
+      "imageUrl": null
+    }
+  ]
+}

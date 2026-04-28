@@ -44,6 +44,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     configure_logging(json_output=True)
     app.state.courses = load_courses()
     app.state.http_session = requests.Session()
+
+    if settings.mock:
+        import structlog
+
+        from golfkompis.mock_client import FakeMinGolf
+
+        log = structlog.get_logger()  # pyright: ignore[reportAny]
+        fake = FakeMinGolf()
+        fake.preload()
+        app.dependency_overrides[get_authenticated_client] = lambda: fake
+        log.info("mock mode enabled — returning fixture data, auth bypassed")  # pyright: ignore[reportAny]
+
     yield
     app.state.http_session.close()
 

@@ -1,0 +1,73 @@
+[
+  {
+    "clubId": "mock-club-0001",
+    "clubName": "Mock Golf Club",
+    "courseId": "mock-course-0001",
+    "date": "2025-07-24",
+    "identifyAllPlayers": false,
+    "slots": [
+      {
+        "id": "mock-slot-aaaa-0001",
+        "time": "2025-07-24T05:00:00Z",
+        "price": { "greenfee": 450 },
+        "flexColor": "green",
+        "nineHoleBookingAavailable": false,
+        "isLocked": false,
+        "availablity": {
+          "bookable": true,
+          "maxNumberOfSlotBookings": 4,
+          "numbersOfSlotBookings": 0,
+          "numberOfBlockedRows": 0,
+          "numberOfNineHoleSlotBookings": 0,
+          "availableSlots": 4
+        },
+        "playersInfo": [],
+        "reservationIds": [],
+        "startProhibitionIds": [],
+        "maximumHcpPerSlot": null
+      },
+      {
+        "id": "mock-slot-aaaa-0002",
+        "time": "2025-07-24T05:10:00Z",
+        "price": { "greenfee": 450 },
+        "flexColor": "green",
+        "nineHoleBookingAavailable": false,
+        "isLocked": false,
+        "availablity": {
+          "bookable": true,
+          "maxNumberOfSlotBookings": 4,
+          "numbersOfSlotBookings": 2,
+          "numberOfBlockedRows": 0,
+          "numberOfNineHoleSlotBookings": 0,
+          "availableSlots": 2
+        },
+        "playersInfo": ["Player A", "Player B"],
+        "reservationIds": [],
+        "startProhibitionIds": [],
+        "maximumHcpPerSlot": null
+      },
+      {
+        "id": "mock-slot-aaaa-0003",
+        "time": "2025-07-24T05:20:00Z",
+        "price": { "greenfee": 450 },
+        "flexColor": "yellow",
+        "nineHoleBookingAavailable": false,
+        "isLocked": true,
+        "availablity": {
+          "bookable": false,
+          "maxNumberOfSlotBookings": 4,
+          "numbersOfSlotBookings": 4,
+          "numberOfBlockedRows": 0,
+          "numberOfNineHoleSlotBookings": 0,
+          "availableSlots": 0
+        },
+        "playersInfo": ["Player C", "Player D", "Player E", "Player F"],
+        "reservationIds": [],
+        "startProhibitionIds": [],
+        "maximumHcpPerSlot": null
+      }
+    ],
+    "reservations": [],
+    "startProhibitions": []
+  }
+]

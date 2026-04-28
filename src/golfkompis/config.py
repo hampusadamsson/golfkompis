@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     mingolf_username: str = ""
     mingolf_password: str = ""
     default_range_weeks: int = 10
+    mock: bool = False
 
 
 settings = Settings()
