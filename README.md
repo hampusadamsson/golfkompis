@@ -167,18 +167,173 @@ Run the development server:
 uv run uvicorn golfkompis.app:app --reload
 ```
 
-Interactive docs at `http://localhost:8000/docs` (Swagger) and `/redoc`. Liveness probe at `/health`.
+Interactive docs at `http://localhost:8000/docs` (Swagger) and `/redoc`.
 
 ### Auth
 
-Pass credentials via headers on every request:
+Pass credentials as headers on every request:
 
 ```
 X-Mingolf-Username: YYMMDD-XXX
 X-Mingolf-Password: yourpassword
 ```
 
-> Credentials are validated against MinGolf on every request — no session is cached server-side. Avoid hammering the endpoint.
+> Credentials are validated against MinGolf on every request — no session is cached server-side.
+> Deploy behind TLS (e.g. nginx, Caddy, Fly.io). No HTTPS enforcement or rate limiting is built in.
+
+### Endpoints
+
+| Method | Path | Auth | Summary |
+|--------|------|------|---------|
+| `GET` | `/health` | — | Liveness probe |
+| `GET` | `/api/v1/booking/find` | ✓ | Search available tee times |
+| `POST` | `/api/v1/booking` | ✓ | Book a tee slot |
+| `GET` | `/api/v1/bookings` | ✓ | List upcoming bookings |
+| `DELETE` | `/api/v1/bookings/{booking_id}` | ✓ | Cancel a booking |
+| `GET` | `/api/v1/history` | ✓ | List played rounds |
+| `GET` | `/api/v1/course/search` | — | Search course catalogue |
+| `GET` | `/api/v1/profile` | ✓ | Fetch user profile |
+| `GET` | `/api/v1/friends` | ✓ | Fetch friend overview |
+
+---
+
+#### `GET /health`
+
+Returns `{"status": "ok"}` while the service is running. No auth required.
+
+```bash
+curl http://localhost:8000/health
+```
+
+---
+
+#### `GET /api/v1/booking/find`
+
+Search available tee slots across one or more courses for a given date.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `date` | `date` | yes | Calendar date, e.g. `2025-07-24` |
+| `start` | `time` | no | Earliest tee time, e.g. `07:30`. No lower bound if omitted. |
+| `stop` | `time` | no | Latest tee time, e.g. `12:00`. No upper bound if omitted. |
+| `spots` | `int` | no | Minimum available spots (default `1`) |
+| `courses` | `list[str]` | yes | Course UUIDs from `/course/search` (max 50, repeat param) |
+
+Returns `list[Slot]`. Slot times are localised to Europe/Stockholm.
+
+```bash
+curl -H "X-Mingolf-Username: YYMMDD-XXX" -H "X-Mingolf-Password: pw" \
+  "http://localhost:8000/api/v1/booking/find?date=2025-07-24&courses=98369cac-d4bb-4671-931f-db10201ba1a5&spots=2"
+```
+
+---
+
+#### `POST /api/v1/booking`
+
+Book a tee slot. Returns `204 No Content` on success.
+
+**Body (JSON):**
+
+```json
+{ "slot_id": "<Slot.id from /booking/find>" }
+```
+
+```bash
+curl -X POST -H "X-Mingolf-Username: YYMMDD-XXX" -H "X-Mingolf-Password: pw" \
+  -H "Content-Type: application/json" \
+  -d '{"slot_id": "abc123"}' \
+  http://localhost:8000/api/v1/booking
+```
+
+---
+
+#### `GET /api/v1/bookings`
+
+List upcoming bookings within an optional date range.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `from` | `date` | no | Start date, defaults to today |
+| `to` | `date` | no | End date, defaults to today + configured range weeks |
+
+Returns `list[Booking]`.
+
+---
+
+#### `DELETE /api/v1/bookings/{booking_id}`
+
+Cancel a booking by its ID (`Booking.bookingInfo.bookingId`). Returns `204 No Content`.
+
+> Only cancels your own entry. Group bookings require each player to cancel separately.
+> Lookup window is the next 10 weeks.
+
+```bash
+curl -X DELETE -H "X-Mingolf-Username: YYMMDD-XXX" -H "X-Mingolf-Password: pw" \
+  http://localhost:8000/api/v1/bookings/your-booking-id
+```
+
+---
+
+#### `GET /api/v1/history`
+
+List played rounds within an optional date range.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `from` | `date` | no | Start date, defaults to today minus configured range weeks |
+| `to` | `date` | no | End date, defaults to today |
+
+Returns `list[Booking]`.
+
+---
+
+#### `GET /api/v1/course/search`
+
+Search the bundled course catalogue by club name substring. No auth required.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `course` | `str` | yes | Substring to match (min 2 chars), e.g. `Botkyrka` |
+| `only_18` | `bool` | no | Exclude 9-hole courses (default `false`) |
+| `limit` | `int` | no | Max results, 1–500 (default `50`) |
+
+Returns `list[Course]` with `CourseID` values usable as `courses` in `/booking/find`.
+
+```bash
+curl "http://localhost:8000/api/v1/course/search?course=Botkyrka"
+```
+
+> The catalogue is a bundled snapshot (`resources/courses.json`) and may be slightly stale.
+
+---
+
+#### `GET /api/v1/profile`
+
+Fetch the authenticated user's MinGolf profile (HCP, membership clubs, permissions).
+
+Returns `Profile`.
+
+---
+
+#### `GET /api/v1/friends`
+
+Fetch the authenticated user's friend overview.
+
+Returns `FriendOverview` with `friends` (own list) and `reversedFriends` (users who added you).
+
+---
+
+### Error codes
+
+| Status | Meaning |
+|--------|---------|
+| `400` | Invalid request (bad date range, invalid MinGolf request) |
+| `401` | Missing or rejected MinGolf credentials |
+| `404` | Resource not found (unknown course UUID, booking not found) |
+| `409` | Booking conflict (slot taken, state mismatch) |
+| `422` | Request validation error (malformed query params or body) |
+| `429` | MinGolf rate limit exceeded |
+| `502` | MinGolf upstream unreachable or returned an unexpected error |
 
 ## Docker
 

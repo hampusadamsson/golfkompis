@@ -32,6 +32,14 @@ log = structlog.get_logger()  # pyright: ignore[reportAny]
 DEFAULT_TIMEOUT = 30  # seconds
 
 
+class BookingNotFound(LookupError):
+    """Raised when a booking_id is not present in the user's upcoming calendar."""
+
+
+class CancelConflict(RuntimeError):
+    """Raised when a booking_id cannot be located in the slot bookings view."""
+
+
 def _default_headers() -> dict[str, str]:
     return {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36",
@@ -382,9 +390,10 @@ class MinGolf:
 
         Raises
         ------
-        ValueError
-            If no upcoming booking matches ``booking_id``, or if the slot
-            bookings view does not contain the expected entry.
+        BookingNotFound
+            If no upcoming booking matches ``booking_id``.
+        CancelConflict
+            If the slot bookings view does not contain the expected entry.
         requests.HTTPError
             On non-2xx HTTP response.
         """
@@ -400,7 +409,9 @@ class MinGolf:
             None,
         )
         if booking is None:
-            raise ValueError(f"booking {booking_id} not found in upcoming bookings")
+            raise BookingNotFound(
+                f"booking {booking_id} not found in upcoming bookings"
+            )
 
         slot_date = date.fromisoformat(booking.slotTimeAsDate[:10])
         view = self.fetch_slot_bookings(
@@ -410,7 +421,9 @@ class MinGolf:
             (sb for sb in view.slotBookings if sb.bookingId == booking_id), None
         )
         if entry is None:
-            raise ValueError(f"booking {booking_id} not present in slot bookings view")
+            raise CancelConflict(
+                f"booking {booking_id} not present in slot bookings view"
+            )
 
         # Lock
         lock_url = SLOT_LOCK.format(slot_id=booking.slotId)
