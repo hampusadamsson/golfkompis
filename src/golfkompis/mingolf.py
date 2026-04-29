@@ -6,6 +6,7 @@ from datetime import date, timedelta
 import requests
 import structlog
 
+from golfkompis.config import settings
 from golfkompis.domain import (
     Booking,
     Course,
@@ -31,6 +32,14 @@ log = structlog.get_logger()  # pyright: ignore[reportAny]
 
 DEFAULT_TIMEOUT = 30  # seconds
 
+# MinGolf's API requires a browser-like User-Agent; requests with Python's default
+# UA are rejected with 403. This UA string was observed to work in production.
+_MINGOLF_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/83.0.4103.97 Safari/537.36"
+)
+
 
 class BookingNotFound(LookupError):
     """Raised when a booking_id is not present in the user's upcoming calendar."""
@@ -42,7 +51,7 @@ class CancelConflict(RuntimeError):
 
 def _default_headers() -> dict[str, str]:
     return {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36",
+        "User-Agent": _MINGOLF_USER_AGENT,
         "Content-Type": "application/json; charset=utf-8",
     }
 
@@ -399,7 +408,9 @@ class MinGolf:
         """
         self._require_login()
         today = date.today()
-        bookings = self.fetch_bookings(today, today + timedelta(weeks=10))
+        bookings = self.fetch_bookings(
+            today, today + timedelta(weeks=settings.default_range_weeks)
+        )
         booking = next(
             (
                 b

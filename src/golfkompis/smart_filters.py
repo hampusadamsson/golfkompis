@@ -58,7 +58,7 @@ def filter_eligible_slots(
     return [slot for slot in schedule.slots if eligible(slot)]
 
 
-def filter(
+def filter_schedules(
     schedule: list[CourseSchedule],
     start_time: time | None,
     stop_time: time | None,

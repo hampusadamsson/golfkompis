@@ -5,10 +5,13 @@ the domain Pydantic models at preload time, so stale fixtures fail loudly on
 startup rather than at request time.
 """
 
-import os
+import json
+from datetime import date
+from pathlib import Path
 
 from golfkompis.domain import (
     Booking,
+    Course,
     CourseSchedule,
     FriendOverview,
     GolfCalendar,
@@ -16,12 +19,11 @@ from golfkompis.domain import (
 )
 from golfkompis.mingolf import MinGolf
 
-_FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
+_FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
 def _load(filename: str) -> str:
-    with open(os.path.join(_FIXTURES_DIR, filename)) as fh:
-        return fh.read()
+    return (_FIXTURES_DIR / filename).read_text()
 
 
 class FakeMinGolf(MinGolf):
@@ -53,15 +55,13 @@ class FakeMinGolf(MinGolf):
         """
         self._course_schedules = [
             CourseSchedule.model_validate(item)
-            for item in __import__("json").loads(_load("course_schedules.json"))
+            for item in json.loads(_load("course_schedules.json"))
         ]
         self._bookings = [
-            Booking.model_validate(item)
-            for item in __import__("json").loads(_load("bookings.json"))
+            Booking.model_validate(item) for item in json.loads(_load("bookings.json"))
         ]
         self._history = [
-            Booking.model_validate(item)
-            for item in __import__("json").loads(_load("history.json"))
+            Booking.model_validate(item) for item in json.loads(_load("history.json"))
         ]
         self._profile = Profile.model_validate_json(_load("profile.json"))
         self._friends = FriendOverview.model_validate_json(_load("friends.json"))
@@ -75,8 +75,8 @@ class FakeMinGolf(MinGolf):
 
     def find_available_slots(  # type: ignore[override]
         self,
-        courses: object,
-        date: object,
+        courses: list[Course],
+        date: date,
     ) -> list[CourseSchedule]:
         """Return the canned course schedules fixture.
 
@@ -99,8 +99,8 @@ class FakeMinGolf(MinGolf):
 
     def fetch_bookings(  # type: ignore[override]
         self,
-        from_date: object,
-        to_date: object,
+        from_date: date,
+        to_date: date,
     ) -> list[Booking]:
         """Return the canned bookings fixture.
 
@@ -123,8 +123,8 @@ class FakeMinGolf(MinGolf):
 
     def fetch_calendar(  # type: ignore[override]
         self,
-        from_date: object,
-        to_date: object,
+        from_date: date,
+        to_date: date,
     ) -> GolfCalendar:
         """Return a GolfCalendar built from the history fixture.
 

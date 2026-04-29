@@ -1,14 +1,17 @@
-"""This is the cli version of the golfkompis app."""
+"""CLI entry-points for golfkompis (argparse subcommands)."""
 
 import argparse
 import importlib.metadata
 import json
 import sys
+import traceback
+from collections.abc import Callable
 from datetime import date, time, timedelta
 
 from golfkompis import smart_filters
 from golfkompis.config import settings
 from golfkompis.course import load_courses
+from golfkompis.domain import Course
 from golfkompis.logging import configure_logging
 from golfkompis.mingolf import MinGolf
 
@@ -58,10 +61,16 @@ def _require_credentials(args: argparse.Namespace) -> tuple[str, str]:
     return username, password
 
 
-def cmd_book(args: argparse.Namespace) -> None:
+def _authenticated_client(args: argparse.Namespace) -> MinGolf:
+    """Create and authenticate a MinGolf client from CLI args/settings."""
     username, password = _require_credentials(args)
     golf = MinGolf()
     golf.login(username, password)
+    return golf
+
+
+def cmd_book(args: argparse.Namespace) -> None:
+    golf = _authenticated_client(args)
     golf.book_teetime(args.slot_id)  # pyright: ignore[reportAny]
     print(f"Booked slot {args.slot_id}")  # pyright: ignore[reportAny]
 
@@ -79,7 +88,7 @@ def cmd_find(args: argparse.Namespace) -> None:
     uuid_list: list[str] = args.courses or []  # pyright: ignore[reportAny]
     name_csv: str = args.course or ""  # pyright: ignore[reportAny]
 
-    courses_list = [all_courses.get_uuid(uuid) for uuid in uuid_list]
+    courses_list: list[Course] = [all_courses.get_uuid(uuid) for uuid in uuid_list]
 
     if name_csv:
         for name_part in name_csv.split(","):
@@ -94,8 +103,6 @@ def cmd_find(args: argparse.Namespace) -> None:
                 courses_list.extend(matched)
 
     # Deduplicate while preserving order.
-    from golfkompis.domain import Course
-
     seen: set[str] = set()
     unique_courses: list[Course] = []
     for c in courses_list:
@@ -114,12 +121,9 @@ def cmd_find(args: argparse.Namespace) -> None:
     start_time = time.fromisoformat(args.start) if args.start else None  # pyright: ignore[reportAny]
     stop_time = time.fromisoformat(args.stop) if args.stop else None  # pyright: ignore[reportAny]
 
-    username, password = _require_credentials(args)
-
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     schedule = golf.find_available_slots(unique_courses, search_date)
-    slots = smart_filters.filter(schedule, start_time, stop_time, args.spots)  # pyright: ignore[reportAny]
+    slots = smart_filters.filter_schedules(schedule, start_time, stop_time, args.spots)  # pyright: ignore[reportAny]
     print(json.dumps([s.model_dump() for s in slots], indent=2, ensure_ascii=False))
 
 
@@ -130,10 +134,7 @@ def cmd_bookings(args: argparse.Namespace) -> None:
         if args.to_date  # pyright: ignore[reportAny]
         else date.today() + timedelta(weeks=settings.default_range_weeks)
     )
-    username, password = _require_credentials(args)
-
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     bookings = golf.fetch_bookings(from_date, to_date)
     print(json.dumps([b.model_dump() for b in bookings], indent=2, ensure_ascii=False))
 
@@ -145,10 +146,7 @@ def cmd_history(args: argparse.Namespace) -> None:
         else date.today() - timedelta(weeks=settings.default_range_weeks)
     )
     to_date = date.fromisoformat(args.to_date) if args.to_date else date.today()  # pyright: ignore[reportAny]
-    username, password = _require_credentials(args)
-
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     calendar = golf.fetch_calendar(from_date, to_date)
     print(
         json.dumps(
@@ -160,27 +158,33 @@ def cmd_history(args: argparse.Namespace) -> None:
 
 
 def cmd_cancel(args: argparse.Namespace) -> None:
-    username, password = _require_credentials(args)
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     golf.cancel_booking(args.booking_id)  # pyright: ignore[reportAny]
     print(f"Cancelled booking {args.booking_id}")  # pyright: ignore[reportAny]
 
 
 def cmd_profile(args: argparse.Namespace) -> None:
-    username, password = _require_credentials(args)
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     profile = golf.fetch_profile()
     print(json.dumps(profile.model_dump(), indent=2, ensure_ascii=False))
 
 
 def cmd_friends(args: argparse.Namespace) -> None:
-    username, password = _require_credentials(args)
-    golf = MinGolf()
-    golf.login(username, password)
+    golf = _authenticated_client(args)
     overview = golf.fetch_friends()
     print(json.dumps(overview.model_dump(), indent=2, ensure_ascii=False))
+
+
+_COMMAND_HANDLERS: dict[str, Callable[[argparse.Namespace], None]] = {
+    "courses": cmd_courses,
+    "find": cmd_find,
+    "book": cmd_book,
+    "bookings": cmd_bookings,
+    "history": cmd_history,
+    "cancel": cmd_cancel,
+    "profile": cmd_profile,
+    "friends": cmd_friends,
+}
 
 
 def _auth_parser() -> argparse.ArgumentParser:
@@ -214,6 +218,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="version",
         version=f"%(prog)s {importlib.metadata.version('golfkompis')}",
         help="Show version and exit.",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Print full traceback on error.",
     )
     sub = parser.add_subparsers(dest="command")
 
@@ -366,25 +376,18 @@ def main() -> None:
             print_root_help()
         sys.exit(0)
 
+    handler = _COMMAND_HANDLERS.get(args.command)  # pyright: ignore[reportAny]
+    if handler is None:
+        print(f"Unknown command: {args.command}", file=sys.stderr)  # pyright: ignore[reportAny]
+        sys.exit(1)
+
     try:
-        if args.command == "courses":  # pyright: ignore[reportAny]
-            cmd_courses(args)
-        elif args.command == "find":  # pyright: ignore[reportAny]
-            cmd_find(args)
-        elif args.command == "book":  # pyright: ignore[reportAny]
-            cmd_book(args)
-        elif args.command == "bookings":  # pyright: ignore[reportAny]
-            cmd_bookings(args)
-        elif args.command == "history":  # pyright: ignore[reportAny]
-            cmd_history(args)
-        elif args.command == "cancel":  # pyright: ignore[reportAny]
-            cmd_cancel(args)
-        elif args.command == "profile":  # pyright: ignore[reportAny]
-            cmd_profile(args)
-        elif args.command == "friends":  # pyright: ignore[reportAny]
-            cmd_friends(args)
+        handler(args)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        if args.debug:  # pyright: ignore[reportAny]
+            traceback.print_exc()
+        else:
+            print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 

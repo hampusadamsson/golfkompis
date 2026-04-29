@@ -2,11 +2,13 @@
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
 from datetime import date, time, timedelta
 from importlib.metadata import version
 from typing import Annotated
 
 import requests
+import structlog
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
@@ -35,6 +37,17 @@ _BOOKING_WRITE_RESPONSES: dict[int | str, dict[str, object]] = {
 
 
 # ---------------------------------------------------------------------------
+# Typed app state
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class AppState:
+    courses: Courses = field(default_factory=lambda: Courses(courses=[]))
+    http_session: requests.Session = field(default_factory=requests.Session)
+
+
+# ---------------------------------------------------------------------------
 # Lifespan
 # ---------------------------------------------------------------------------
 
@@ -42,12 +55,10 @@ _BOOKING_WRITE_RESPONSES: dict[int | str, dict[str, object]] = {
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     configure_logging(json_output=True)
-    app.state.courses = load_courses()
-    app.state.http_session = requests.Session()
+    state = AppState(courses=load_courses(), http_session=requests.Session())
+    app.state.app_state = state
 
     if settings.mock:
-        import structlog
-
         from golfkompis.mock_client import FakeMinGolf
 
         log = structlog.get_logger()  # pyright: ignore[reportAny]
@@ -57,7 +68,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         log.info("mock mode enabled — returning fixture data, auth bypassed")  # pyright: ignore[reportAny]
 
     yield
-    app.state.http_session.close()
+    state.http_session.close()
 
 
 # ---------------------------------------------------------------------------
@@ -181,7 +192,8 @@ def get_courses(request: Request) -> Courses:
     Courses
         Parsed courses catalogue loaded at startup.
     """
-    return request.app.state.courses  # type: ignore[no-any-return]
+    state: AppState = request.app.state.app_state
+    return state.courses
 
 
 CourseCatalogue = Annotated[Courses, Depends(get_courses)]
@@ -214,7 +226,8 @@ def get_authenticated_client(
         ``401`` if credentials are rejected by MinGolf.
         ``502`` if the MinGolf API returns an HTTP error during login.
     """
-    golf = MinGolf(session=request.app.state.http_session)
+    state: AppState = request.app.state.app_state
+    golf = MinGolf(session=state.http_session)
     try:
         golf.login(x_mingolf_username, x_mingolf_password)
     except ValueError as e:
@@ -328,7 +341,7 @@ def find(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
     schedule = golf.find_available_slots(courses_list, date)
-    return smart_filters.filter(schedule, start, stop, spots)
+    return smart_filters.filter_schedules(schedule, start, stop, spots)
 
 
 @app.post(
