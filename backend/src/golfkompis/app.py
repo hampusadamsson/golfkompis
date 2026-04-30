@@ -1,16 +1,21 @@
 """FastAPI app for golfkompis - tee time search."""
 
+import hashlib
+import threading
+import time as _time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import date, time, timedelta
 from importlib.metadata import version
+from pathlib import Path
 from typing import Annotated
 
 import requests
 import structlog
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from golfkompis import smart_filters
@@ -21,8 +26,9 @@ from golfkompis.logging import configure_logging
 from golfkompis.mingolf import BookingNotFound, CancelConflict, MinGolf
 
 _AUTH_HEADER_NOTE = (
-    "Credentials are validated against MinGolf on every request — "
-    "no session is cached server-side."
+    "Credentials authenticate against MinGolf on first use; the resulting session "
+    "is cached server-side for ~30 minutes (configurable via SESSION_TTL_MINUTES). "
+    "Deploy behind TLS; no HTTPS enforcement is built in."
 )
 
 _ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
@@ -37,6 +43,92 @@ _BOOKING_WRITE_RESPONSES: dict[int | str, dict[str, object]] = {
 
 
 # ---------------------------------------------------------------------------
+# Session cache
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class _CachedClient:
+    client: MinGolf
+    created_at: float
+
+
+class SessionCache:
+    """Thread-safe TTL cache of authenticated MinGolf instances keyed by credential hash.
+
+    Each cached entry owns its own ``requests.Session``, so sessions are
+    isolated between users. Instances are *not* individually locked — the
+    underlying ``requests.Session`` is documented as not thread-safe, so two
+    concurrent requests from the same user sharing one cached instance may
+    interleave. In practice this is safe for the simple GET/POST calls made
+    here, but callers should be aware of the limitation.
+    """
+
+    def __init__(self, ttl_seconds: float, max_entries: int) -> None:
+        self._ttl = ttl_seconds
+        self._max = max_entries
+        self._entries: dict[str, _CachedClient] = {}
+        self._lock = threading.Lock()
+
+    @staticmethod
+    def _key(username: str, password: str) -> str:
+        return hashlib.sha256(f"{username}\0{password}".encode()).hexdigest()
+
+    def get_or_login(self, username: str, password: str) -> MinGolf:
+        """Return a ready authenticated client, logging in only when needed.
+
+        Parameters
+        ----------
+        username:
+            Golf-ID (``YYMMDD-XXX``).
+        password:
+            MinGolf password.
+
+        Raises
+        ------
+        ValueError
+            If MinGolf rejects the credentials.
+        requests.HTTPError
+            On non-2xx HTTP response during login.
+        """
+        key = self._key(username, password)
+        now = _time.monotonic()
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is not None and (now - entry.created_at) < self._ttl:
+                return entry.client
+
+        # Login outside the global lock so unrelated users aren't blocked.
+        client = MinGolf()
+        client.login(username, password)
+
+        with self._lock:
+            self._evict_locked(now)
+            self._entries[key] = _CachedClient(client=client, created_at=now)
+        return client
+
+    def _evict_locked(self, now: float) -> None:
+        """Remove expired entries; if still over cap, drop oldest. Must hold _lock."""
+        self._entries = {
+            k: v for k, v in self._entries.items() if (now - v.created_at) < self._ttl
+        }
+        if len(self._entries) >= self._max:
+            oldest_key = min(self._entries, key=lambda k: self._entries[k].created_at)
+            del self._entries[oldest_key]
+
+    def close_all(self) -> None:
+        """Close all cached sessions and clear the cache."""
+        with self._lock:
+            for entry in self._entries.values():
+                entry.client.session.close()
+            self._entries.clear()
+
+    def __len__(self) -> int:
+        with self._lock:
+            return len(self._entries)
+
+
+# ---------------------------------------------------------------------------
 # Typed app state
 # ---------------------------------------------------------------------------
 
@@ -44,7 +136,9 @@ _BOOKING_WRITE_RESPONSES: dict[int | str, dict[str, object]] = {
 @dataclass
 class AppState:
     courses: Courses = field(default_factory=lambda: Courses(courses=[]))
-    http_session: requests.Session = field(default_factory=requests.Session)
+    session_cache: SessionCache = field(
+        default_factory=lambda: SessionCache(ttl_seconds=0, max_entries=0)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -55,7 +149,13 @@ class AppState:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     configure_logging(json_output=True)
-    state = AppState(courses=load_courses(), http_session=requests.Session())
+    state = AppState(
+        courses=load_courses(),
+        session_cache=SessionCache(
+            ttl_seconds=settings.session_ttl_minutes * 60,
+            max_entries=settings.session_cache_max,
+        ),
+    )
     app.state.app_state = state
 
     if settings.mock:
@@ -68,7 +168,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         log.info("mock mode enabled — returning fixture data, auth bypassed")  # pyright: ignore[reportAny]
 
     yield
-    state.http_session.close()
+    state.session_cache.close_all()
 
 
 # ---------------------------------------------------------------------------
@@ -80,8 +180,7 @@ app = FastAPI(
     description=(
         "Unofficial HTTP wrapper around [MinGolf](https://mingolf.golf.se) — "
         "the Swedish golf-club booking system. "
-        f"{_AUTH_HEADER_NOTE} "
-        "Deploy behind TLS; no HTTPS enforcement is built in."
+        f"{_AUTH_HEADER_NOTE}"
     ),
     version=version("golfkompis"),
     lifespan=lifespan,
@@ -204,12 +303,15 @@ def get_authenticated_client(
     x_mingolf_username: str = Header(..., alias="X-Mingolf-Username"),
     x_mingolf_password: str = Header(..., alias="X-Mingolf-Password"),
 ) -> MinGolf:
-    """Authenticate against MinGolf and return a ready client.
+    """Return an authenticated MinGolf client, reusing a cached session when available.
+
+    The session is cached server-side for ``SESSION_TTL_MINUTES`` minutes
+    (default 30). Login is only called on cache miss or TTL expiry.
 
     Parameters
     ----------
     request:
-        The incoming FastAPI request used to access the shared HTTP session.
+        The incoming FastAPI request used to access the session cache.
     x_mingolf_username:
         Golf-ID in ``YYMMDD-XXX`` format, passed via ``X-Mingolf-Username`` header.
     x_mingolf_password:
@@ -227,14 +329,12 @@ def get_authenticated_client(
         ``502`` if the MinGolf API returns an HTTP error during login.
     """
     state: AppState = request.app.state.app_state
-    golf = MinGolf(session=state.http_session)
     try:
-        golf.login(x_mingolf_username, x_mingolf_password)
+        return state.session_cache.get_or_login(x_mingolf_username, x_mingolf_password)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except requests.HTTPError as e:
         raise HTTPException(status_code=502, detail=f"MinGolf API error: {e}") from e
-    return golf
 
 
 GolfClient = Annotated[MinGolf, Depends(get_authenticated_client)]
@@ -651,3 +751,20 @@ def friends(golf: GolfClient) -> FriendOverview:
         ``502`` on upstream MinGolf errors.
     """
     return golf.fetch_friends()
+
+
+# ---------------------------------------------------------------------------
+# SPA static file serving (no-op in local dev where static/ doesn't exist)
+# ---------------------------------------------------------------------------
+
+_STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
+
+if _STATIC_DIR.is_dir():
+    app.mount("/_app", StaticFiles(directory=_STATIC_DIR / "_app"), name="_app")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def _spa_fallback(full_path: str) -> FileResponse:
+        candidate = _STATIC_DIR / full_path
+        if candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_STATIC_DIR / "index.html")

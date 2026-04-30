@@ -57,6 +57,13 @@ def _default_headers() -> dict[str, str]:
 
 
 class MinGolf:
+    """Client for the MinGolf API.
+
+    Not thread-safe. The underlying ``requests.Session`` may interleave
+    header/cookie state if a single instance is used concurrently from
+    multiple threads. Each authenticated user should own a separate instance.
+    """
+
     def __init__(self, session: requests.Session | None = None) -> None:
         self.session = session or requests.Session()
         self.session.headers.update(_default_headers())

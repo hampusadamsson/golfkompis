@@ -2,7 +2,7 @@
 name = "golfkompis"
 version = "1.0.1"
 description = "A system to manage golf bookings"
-readme = "README.md"
+
 requires-python = "==3.13.*"
 dependencies = [
   "fastapi>=0.136.1",

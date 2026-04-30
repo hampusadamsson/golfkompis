@@ -261,7 +261,7 @@ def client() -> Generator[TestClient]:
     fastapi_app.dependency_overrides[get_courses] = _fake_courses
     # Also seed app.state so get_courses fallback path works
     fastapi_app.state.app_state = AppState(
-        courses=_load_courses(), http_session=__import__("requests").Session()
+        courses=_load_courses(),
     )
     with TestClient(fastapi_app, raise_server_exceptions=True) as c:
         yield c

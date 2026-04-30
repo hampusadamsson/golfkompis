@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     mingolf_password: str = ""
     default_range_weeks: int = 10
     mock: bool = False
+    session_ttl_minutes: int = 30
+    session_cache_max: int = 256
 
 
 settings = Settings()
