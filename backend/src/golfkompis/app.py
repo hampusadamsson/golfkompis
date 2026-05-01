@@ -13,7 +13,7 @@ from typing import Annotated
 
 import requests
 import structlog
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -200,8 +200,10 @@ app = FastAPI(
 
 from golfkompis.users.manager import (  # noqa: E402
     auth_backend,  # pyright: ignore[reportUnknownVariableType]
+    current_active_user,
     fastapi_users,
 )
+from golfkompis.users.models import User  # noqa: E402
 from golfkompis.users.schemas import UserCreate, UserRead, UserUpdate  # noqa: E402
 
 app.include_router(
@@ -344,22 +346,18 @@ CourseCatalogue = Annotated[Courses, Depends(get_courses)]
 
 def get_authenticated_client(
     request: Request,
-    x_mingolf_username: str = Header(..., alias="X-Mingolf-Username"),
-    x_mingolf_password: str = Header(..., alias="X-Mingolf-Password"),
+    user: Annotated[User, Depends(current_active_user)],
 ) -> MinGolf:
     """Return an authenticated MinGolf client, reusing a cached session when available.
 
-    The session is cached server-side for ``SESSION_TTL_MINUTES`` minutes
-    (default 30). Login is only called on cache miss or TTL expiry.
+    Reads MinGolf credentials from the authenticated user's DB record.
 
     Parameters
     ----------
     request:
         The incoming FastAPI request used to access the session cache.
-    x_mingolf_username:
-        Golf-ID in ``YYMMDD-XXX`` format, passed via ``X-Mingolf-Username`` header.
-    x_mingolf_password:
-        MinGolf password, passed via ``X-Mingolf-Password`` header.
+    user:
+        The currently authenticated app user (injected by fastapi-users).
 
     Returns
     -------
@@ -369,12 +367,17 @@ def get_authenticated_client(
     Raises
     ------
     HTTPException
+        ``412`` if the user has no MinGolf credentials stored.
         ``401`` if credentials are rejected by MinGolf.
         ``502`` if the MinGolf API returns an HTTP error during login.
     """
+    if not user.mingolf_username or not user.mingolf_password:
+        raise HTTPException(status_code=412, detail="mingolf_not_linked")
     state: AppState = request.app.state.app_state
     try:
-        return state.session_cache.get_or_login(x_mingolf_username, x_mingolf_password)
+        return state.session_cache.get_or_login(
+            user.mingolf_username, user.mingolf_password
+        )
     except InvalidCredentials as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except ValueError as e:
@@ -454,7 +457,7 @@ def find(
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
     courses_cat:
         Local course catalogue (injected from app state).
     date:
@@ -504,7 +507,7 @@ def book(golf: GolfClient, body: BookingRequest) -> None:
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
     body:
         Request body containing ``slot_id`` (UUID from ``/booking/find``).
 
@@ -545,7 +548,7 @@ def bookings(
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
     from_:
         Start of the date range (inclusive). Defaults to today.
     to:
@@ -597,7 +600,7 @@ def cancel(golf: GolfClient, booking_id: str) -> None:
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
     booking_id:
         Booking UUID (``Booking.bookingInfo.bookingId`` from ``/bookings``).
 
@@ -640,7 +643,7 @@ def history(
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
     from_:
         Start of the date range (inclusive).
         Defaults to today minus ``settings.default_range_weeks``.
@@ -751,7 +754,7 @@ def profile(golf: GolfClient) -> Profile:
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
 
     Returns
     -------
@@ -783,7 +786,7 @@ def friends(golf: GolfClient) -> FriendOverview:
     Parameters
     ----------
     golf:
-        Authenticated MinGolf client (injected via ``X-Mingolf-*`` headers).
+        Authenticated MinGolf client (injected via session-based auth).
 
     Returns
     -------
