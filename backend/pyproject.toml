@@ -6,6 +6,8 @@ description = "A system to manage golf bookings"
 requires-python = "==3.13.*"
 dependencies = [
   "fastapi>=0.136.1",
+  "fastapi-users[sqlalchemy]>=14.0.0",
+  "aiosqlite>=0.20.0",
   "pydantic>=2.13.3",
   "pydantic-settings>=2.6.0",
   "requests>=2.33.1",
@@ -22,7 +24,9 @@ dev = [
   "pre-commit>=4.0.0",
   "ruff>=0.15.12",
   "pytest>=9.0.3",
+  "pytest-asyncio>=0.24.0",
   "httpx>=0.28.1",
+  "asgi-lifespan>=2.1.0",
 ]
 
 [tool.ruff]
@@ -49,6 +53,7 @@ typeCheckingMode = "strict"
 
 [tool.pytest.ini_options]
 testpaths = ["src/tests"]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["hatchling"]

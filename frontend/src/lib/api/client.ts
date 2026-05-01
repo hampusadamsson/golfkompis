@@ -98,7 +98,7 @@ function createRequester(config: Required<ApiConfig>): Requester {
 		}
 		if (opts.contentType) {
 			headers['Content-Type'] = opts.contentType;
-		} else 		if (opts.contentType) {
+		} else if (opts.contentType) {
 			headers['Content-Type'] = opts.contentType;
 		} else if (body !== undefined) {
 			headers['Content-Type'] = 'application/json';

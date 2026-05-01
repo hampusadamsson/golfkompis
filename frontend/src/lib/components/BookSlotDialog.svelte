@@ -85,11 +85,12 @@
 					<CheckIcon class="h-5 w-5" />
 					Starttid bokad!
 				</DialogTitle>
-			<DialogDescription>
-				{formatSlotTime(bookedSlot.time)} &mdash; {formatDateLong(date)}{#if course} &middot; {course.ClubName} – {course.CourseName}{/if}
-			</DialogDescription>
+				<DialogDescription>
+					{formatSlotTime(bookedSlot.time)} &mdash; {formatDateLong(date)}{#if course}
+						&middot; {course.ClubName} – {course.CourseName}{/if}
+				</DialogDescription>
 			</DialogHeader>
-			<p class="text-muted-foreground py-2 text-sm">
+			<p class="py-2 text-sm text-muted-foreground">
 				Din bokning är bekräftad. Se <strong>Kommande bokningar</strong> nedan.
 			</p>
 			<DialogFooter>
@@ -99,9 +100,9 @@
 			<!-- Booking form -->
 			<DialogHeader>
 				<DialogTitle class="flex items-center gap-2">
-				<span>Boka starttid</span>
-				{#if slot.nineHoleBookingAavailable}
-					<Badge variant="secondary" class="text-xs">9 hål</Badge>
+					<span>Boka starttid</span>
+					{#if slot.nineHoleBookingAavailable}
+						<Badge variant="secondary" class="text-xs">9 hål</Badge>
 					{/if}
 					{#if slot.flexColor}
 						{@const fc = flexColorStyle(slot.flexColor)}
@@ -114,15 +115,16 @@
 						{/if}
 					{/if}
 				</DialogTitle>
-			<DialogDescription>
-				{formatSlotTime(slot.time)} &mdash; {formatDateLong(date)}{#if course} &middot; {course.ClubName} – {course.CourseName}{/if}
-			</DialogDescription>
+				<DialogDescription>
+					{formatSlotTime(slot.time)} &mdash; {formatDateLong(date)}{#if course}
+						&middot; {course.ClubName} – {course.CourseName}{/if}
+				</DialogDescription>
 			</DialogHeader>
 
 			<div class="space-y-3 py-2 text-sm">
 				<!-- Players in ball -->
 				<div>
-					<p class="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
+					<p class="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 						Spelare i bollen
 					</p>
 					{#if slot.playersInfo.length > 0}
@@ -139,14 +141,14 @@
 				<!-- Availability -->
 				<div class="flex items-center gap-4">
 					<div>
-						<p class="text-muted-foreground mb-0.5 text-xs font-medium uppercase tracking-wide">
+						<p class="mb-0.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 							Lediga platser
 						</p>
 						<p>{slot.availablity.availableSlots} / {slot.availablity.maxNumberOfSlotBookings}</p>
 					</div>
 					{#if slot.price.greenfee !== null}
 						<div>
-							<p class="text-muted-foreground mb-0.5 text-xs font-medium uppercase tracking-wide">
+							<p class="mb-0.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 								Greenfee
 							</p>
 							<p>{slot.price.greenfee} kr</p>
@@ -156,7 +158,7 @@
 
 				<!-- HCP warning -->
 				{#if slot.maximumHcpPerSlot !== null}
-					<div class="bg-muted/60 flex items-start gap-2 rounded-md px-3 py-2 text-xs">
+					<div class="flex items-start gap-2 rounded-md bg-muted/60 px-3 py-2 text-xs">
 						<TriangleAlertIcon class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
 						<span>Max HCP för denna tid: {slot.maximumHcpPerSlot}</span>
 					</div>

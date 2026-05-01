@@ -32,7 +32,10 @@ export function courses(req: Requester) {
 		 * Return the full bundled course catalogue.
 		 * No authentication required.
 		 */
-		listCourses(params: ListCoursesParams = {}, opts?: { signal?: AbortSignal }): Promise<Course[]> {
+		listCourses(
+			params: ListCoursesParams = {},
+			opts?: { signal?: AbortSignal }
+		): Promise<Course[]> {
 			return req<Course[]>('GET', '/api/v1/course/list', {
 				query: params,
 				signal: opts?.signal

@@ -55,9 +55,9 @@
 				upcoming = [...data].sort((a, b) => a.slotTimeAsDate.localeCompare(b.slotTimeAsDate));
 			})
 			.catch((err) => {
-			if ((err as { name?: string }).name === 'AbortError') return;
-			errorMessage = getErrorMessage(err);
-		})
+				if ((err as { name?: string }).name === 'AbortError') return;
+				errorMessage = getErrorMessage(err);
+			})
 			.finally(() => {
 				loading = false;
 			});
@@ -91,7 +91,7 @@
 		} catch (err) {
 			errorMessage = getErrorMessage(err, {
 				not_found: 'Bokningen är redan avbokad eller hittas inte.',
-				default: 'Kunde inte avboka.',
+				default: 'Kunde inte avboka.'
 			});
 		} finally {
 			cancellingId = null;
@@ -101,7 +101,7 @@
 	}
 </script>
 
-<div class="border rounded-xl p-4 w-full">
+<div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Kommande bokningar</h2>
 		{#if !loading && !errorMessage && credentials.value}
@@ -110,11 +110,11 @@
 	</div>
 
 	{#if !credentials.value}
-		<p class="text-muted-foreground text-sm">Logga in för att se dina kommande bokningar.</p>
+		<p class="text-sm text-muted-foreground">Logga in för att se dina kommande bokningar.</p>
 	{:else if loading}
 		<ul class="space-y-2">
 			{#each { length: 3 }, i (i)}
-				<li class="bg-muted h-9 animate-pulse rounded"></li>
+				<li class="h-9 animate-pulse rounded bg-muted"></li>
 			{/each}
 		</ul>
 	{:else if errorMessage}
@@ -123,13 +123,13 @@
 			<AlertDescription>{errorMessage}</AlertDescription>
 		</Alert>
 	{:else if upcoming.length === 0}
-		<p class="text-muted-foreground text-sm">Inga kommande bokningar.</p>
+		<p class="text-sm text-muted-foreground">Inga kommande bokningar.</p>
 	{:else}
-		<ul class="divide-border divide-y text-sm">
+		<ul class="divide-y divide-border text-sm">
 			{#each upcoming as round (round.slotId)}
 				<li class="flex items-center gap-3 py-2">
 					<!-- Date + time -->
-					<span class="text-muted-foreground w-32 shrink-0 tabular-nums">
+					<span class="w-32 shrink-0 text-muted-foreground tabular-nums">
 						{dateFmt.format(new Date(round.slotTimeAsDate))}
 						<span class="ml-1 opacity-70">{formatSlotTime(round.slotTime)}</span>
 					</span>

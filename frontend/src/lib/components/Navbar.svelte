@@ -29,7 +29,7 @@
 	}
 </script>
 
-<header class="border-b bg-background sticky top-0 z-40">
+<header class="sticky top-0 z-40 border-b bg-background">
 	<div class="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4">
 		<!-- Brand -->
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
@@ -41,32 +41,33 @@
 			<a
 				href="/"
 				class={page.url.pathname === '/'
-					? 'text-foreground font-medium'
-					: 'text-muted-foreground hover:text-foreground transition-colors'}
+					? 'font-medium text-foreground'
+					: 'text-muted-foreground transition-colors hover:text-foreground'}
 			>
 				Hem
 			</a>
 			<a
 				href="/profile"
 				class={page.url.pathname === '/profile'
-					? 'text-foreground whitespace-nowrap font-medium'
-					: 'text-muted-foreground hover:text-foreground whitespace-nowrap transition-colors'}
+					? 'font-medium whitespace-nowrap text-foreground'
+					: 'whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground'}
 			>
 				Min sida
 			</a>
 			<a
 				href="/book"
 				class={page.url.pathname === '/book'
-					? 'text-foreground font-medium'
-					: 'text-muted-foreground hover:text-foreground transition-colors'}
+					? 'font-medium text-foreground'
+					: 'text-muted-foreground transition-colors hover:text-foreground'}
 			>
 				Boka
 			</a>
 			<a
 				href={currentUser.isLoggedIn ? '/profile/account' : '/login'}
-				class={page.url.pathname.startsWith('/profile/account') || (page.url.pathname as string) === '/login'
-					? 'text-foreground font-medium'
-					: 'text-muted-foreground hover:text-foreground transition-colors'}
+				class={page.url.pathname.startsWith('/profile/account') ||
+				(page.url.pathname as string) === '/login'
+					? 'font-medium text-foreground'
+					: 'text-muted-foreground transition-colors hover:text-foreground'}
 			>
 				Konto
 			</a>
@@ -77,7 +78,7 @@
 
 		<!-- App auth area -->
 		{#if currentUser.isLoggedIn}
-			<span class="text-muted-foreground hidden text-sm sm:inline">
+			<span class="hidden text-sm text-muted-foreground sm:inline">
 				{currentUser.user?.username ?? currentUser.user?.email}
 			</span>
 			<Button variant="ghost" size="sm" onclick={handleAppLogout}>Logga ut konto</Button>
@@ -90,7 +91,7 @@
 
 		<!-- MinGolf auth area -->
 		{#if credentials.profile}
-			<span class="text-muted-foreground hidden text-sm sm:inline">
+			<span class="hidden text-sm text-muted-foreground sm:inline">
 				{credentials.profile.firstName}
 				{credentials.profile.lastName} · HCP {credentials.profile.hcp}
 			</span>

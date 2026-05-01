@@ -37,13 +37,18 @@
 		 * Show the "Remember on this device" checkbox. Default: true.
 		 */
 		allowPersist?: boolean;
-	/**
-	 * Label for the submit button. Default: 'Logga in'.
-	 */
-	submitLabel?: string;
-}
+		/**
+		 * Label for the submit button. Default: 'Logga in'.
+		 */
+		submitLabel?: string;
+	}
 
-	let { apiBaseUrl = '', onSubmit, allowPersist = true, submitLabel = 'Logga in' }: Props = $props();
+	let {
+		apiBaseUrl = '',
+		onSubmit,
+		allowPersist = true,
+		submitLabel = 'Logga in'
+	}: Props = $props();
 
 	// ── Form state ──────────────────────────────────────────────────────────
 	let username = $state(credentials.username);
@@ -85,7 +90,7 @@
 			onSubmit?.({ username, password }, profile);
 		} catch (err) {
 			errorMessage = getErrorMessage(err, {
-				unauthorized: 'Felaktigt Golf-ID eller lösenord. Försök igen.',
+				unauthorized: 'Felaktigt Golf-ID eller lösenord. Försök igen.'
 			});
 		} finally {
 			loading = false;
@@ -128,9 +133,9 @@
 						: undefined}
 				/>
 				{#if usernameTouched && !usernameValid && username.length > 0}
-				<p id="golfid-error" class="text-sm text-destructive">
-					Format: 123456-789 (6 siffror, bindestreck, 3 siffror)
-				</p>
+					<p id="golfid-error" class="text-sm text-destructive">
+						Format: 123456-789 (6 siffror, bindestreck, 3 siffror)
+					</p>
 				{/if}
 			</div>
 

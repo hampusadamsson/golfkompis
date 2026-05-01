@@ -55,7 +55,10 @@ export function bookings(req: Requester) {
 		 * List the authenticated user's upcoming tee-time bookings.
 		 * Requires authentication.
 		 */
-		listBookings(params: ListBookingsParams = {}, opts?: { signal?: AbortSignal }): Promise<Booking[]> {
+		listBookings(
+			params: ListBookingsParams = {},
+			opts?: { signal?: AbortSignal }
+		): Promise<Booking[]> {
 			return req<Booking[]>('GET', '/api/v1/bookings', {
 				query: params,
 				requireAuth: true,

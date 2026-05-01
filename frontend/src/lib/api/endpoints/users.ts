@@ -32,7 +32,10 @@ export function users(req: Requester) {
 		},
 		login(creds: { username: string; password: string }): Promise<void> {
 			const rawBody = new URLSearchParams(creds).toString();
-			return req('POST', '/auth/login', { rawBody, contentType: 'application/x-www-form-urlencoded' });
+			return req('POST', '/auth/login', {
+				rawBody,
+				contentType: 'application/x-www-form-urlencoded'
+			});
 		},
 		logout(): Promise<void> {
 			return req('POST', '/auth/logout', {});

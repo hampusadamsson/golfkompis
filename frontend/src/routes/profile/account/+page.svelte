@@ -67,7 +67,7 @@
 	<h1 class="mb-8 text-2xl font-bold">Mitt konto</h1>
 
 	{#if !currentUser.isLoggedIn}
-		<p class="text-muted-foreground mb-4">Du är inte inloggad.</p>
+		<p class="mb-4 text-muted-foreground">Du är inte inloggad.</p>
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href="/login"><Button>Logga in</Button></a>
 	{:else}
@@ -115,7 +115,7 @@
 		<!-- Change password -->
 		<section class="mb-10">
 			<h2 class="mb-2 text-lg font-semibold">Ändra lösenord</h2>
-			<p class="text-muted-foreground mb-3 text-sm">
+			<p class="mb-3 text-sm text-muted-foreground">
 				Begär en länk via e-post för att ange ett nytt lösenord.
 			</p>
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
@@ -125,9 +125,9 @@
 		</section>
 
 		<!-- Danger zone -->
-		<section class="border-destructive rounded-lg border p-6">
-			<h2 class="text-destructive mb-2 text-lg font-semibold">Radera konto</h2>
-			<p class="text-muted-foreground mb-4 text-sm">
+		<section class="rounded-lg border border-destructive p-6">
+			<h2 class="mb-2 text-lg font-semibold text-destructive">Radera konto</h2>
+			<p class="mb-4 text-sm text-muted-foreground">
 				Ditt konto och all data raderas permanent. Åtgärden kan inte ångras.
 			</p>
 
@@ -142,7 +142,7 @@
 					Radera mitt konto
 				</Button>
 			{:else}
-				<p class="text-destructive mb-3 text-sm font-medium">
+				<p class="mb-3 text-sm font-medium text-destructive">
 					Är du säker? Det går inte att ångra.
 				</p>
 				<div class="flex gap-3">

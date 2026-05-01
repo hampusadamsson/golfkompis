@@ -61,14 +61,9 @@
 
 			<div class="flex flex-col gap-1.5">
 				<Label for="password">Nytt lösenord</Label>
-				<Input
-					id="password"
-					type="password"
-					autocomplete="new-password"
-					bind:value={password}
-				/>
+				<Input id="password" type="password" autocomplete="new-password" bind:value={password} />
 				{#if password.length > 0 && !passwordValid}
-					<p class="text-destructive text-xs">Lösenordet måste vara minst 8 tecken.</p>
+					<p class="text-xs text-destructive">Lösenordet måste vara minst 8 tecken.</p>
 				{/if}
 			</div>
 
@@ -83,7 +78,7 @@
 					aria-invalid={password2Touched && !passwordsMatch}
 				/>
 				{#if password2Touched && !passwordsMatch}
-					<p class="text-destructive text-xs">Lösenorden stämmer inte överens.</p>
+					<p class="text-xs text-destructive">Lösenorden stämmer inte överens.</p>
 				{/if}
 			</div>
 

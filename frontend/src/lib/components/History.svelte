@@ -42,14 +42,12 @@
 		api
 			.getHistory({ from, to }, { signal: controller.signal })
 			.then((data) => {
-				rounds = [...data].sort(
-					(a, b) => b.slotTimeAsDate.localeCompare(a.slotTimeAsDate)
-				);
+				rounds = [...data].sort((a, b) => b.slotTimeAsDate.localeCompare(a.slotTimeAsDate));
 			})
 			.catch((err) => {
-			if ((err as { name?: string }).name === 'AbortError') return;
-			errorMessage = getErrorMessage(err);
-		})
+				if ((err as { name?: string }).name === 'AbortError') return;
+				errorMessage = getErrorMessage(err);
+			})
 			.finally(() => {
 				loading = false;
 			});
@@ -58,7 +56,7 @@
 	});
 </script>
 
-<div class="border rounded-xl p-4 w-full">
+<div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Rundor – senaste 12 månaderna</h2>
 		{#if !loading && !errorMessage && credentials.value}
@@ -67,11 +65,11 @@
 	</div>
 
 	{#if !credentials.value}
-		<p class="text-muted-foreground text-sm">Logga in för att se din rundhistorik.</p>
+		<p class="text-sm text-muted-foreground">Logga in för att se din rundhistorik.</p>
 	{:else if loading}
 		<ul class="space-y-2">
 			{#each { length: 5 }, i (i)}
-				<li class="bg-muted h-9 animate-pulse rounded"></li>
+				<li class="h-9 animate-pulse rounded bg-muted"></li>
 			{/each}
 		</ul>
 	{:else if errorMessage}
@@ -80,13 +78,13 @@
 			<AlertDescription>{errorMessage}</AlertDescription>
 		</Alert>
 	{:else if rounds.length === 0}
-		<p class="text-muted-foreground text-sm">Inga rundor de senaste 12 månaderna.</p>
+		<p class="text-sm text-muted-foreground">Inga rundor de senaste 12 månaderna.</p>
 	{:else}
-		<ul class="divide-border divide-y text-sm">
+		<ul class="divide-y divide-border text-sm">
 			{#each rounds as round (round.slotId)}
 				<li class="flex items-center gap-3 py-2">
 					<!-- Date + time -->
-					<span class="text-muted-foreground w-32 shrink-0 tabular-nums">
+					<span class="w-32 shrink-0 text-muted-foreground tabular-nums">
 						{dateFmt.format(new Date(round.slotTimeAsDate))}
 						<span class="ml-1 opacity-70">{formatSlotTime(round.slotTime)}</span>
 					</span>
@@ -106,7 +104,7 @@
 						{#if round.bookingInfo?.points != null}
 							<Badge class="px-1.5 py-0 text-xs">{round.bookingInfo.points} p</Badge>
 						{:else if round.bookingInfo?.hcpResult}
-							<span class="text-muted-foreground text-xs">HCP {round.bookingInfo.hcpResult}</span>
+							<span class="text-xs text-muted-foreground">HCP {round.bookingInfo.hcpResult}</span>
 						{:else}
 							<span class="text-muted-foreground">—</span>
 						{/if}

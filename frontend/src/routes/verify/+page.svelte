@@ -16,7 +16,8 @@
 			return;
 		}
 		const api = createApiClient({ cookieAuth: true });
-		api.verifyEmail({ token })
+		api
+			.verifyEmail({ token })
 			.then((user) => {
 				currentUser.set(user);
 				success = true;
@@ -49,10 +50,10 @@
 			<AlertDescription>{errorMessage}</AlertDescription>
 		</Alert>
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-		<p class="text-muted-foreground mt-4 text-sm">
+		<p class="mt-4 text-sm text-muted-foreground">
 			<a href="/login" class="underline underline-offset-4">Gå till inloggning</a>
 		</p>
 	{:else}
-		<p class="text-muted-foreground text-sm">Verifierar…</p>
+		<p class="text-sm text-muted-foreground">Verifierar…</p>
 	{/if}
 </main>

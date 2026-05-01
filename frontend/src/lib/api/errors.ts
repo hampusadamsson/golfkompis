@@ -99,7 +99,7 @@ export function getErrorMessage(
 		bad_request: 'Ogiltig förfrågan.',
 		validation: 'Valideringsfel.',
 		unknown: 'Något gick fel.',
-		default: 'Något gick fel.',
+		default: 'Något gick fel.'
 	};
 	const messages = { ...defaults, ...overrides };
 	if (err instanceof ApiError) {

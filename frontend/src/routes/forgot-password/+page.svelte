@@ -61,7 +61,7 @@
 			</Button>
 
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<p class="text-muted-foreground text-center text-sm">
+			<p class="text-center text-sm text-muted-foreground">
 				<a href="/login" class="underline underline-offset-4">Tillbaka till inloggning</a>
 			</p>
 		</form>

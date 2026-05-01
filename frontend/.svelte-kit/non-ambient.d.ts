@@ -29,16 +29,22 @@ declare module "$app/types" {
 	type MatcherParam<M> = M extends (param : string) => param is (infer U extends string) ? U : string;
 
 	export interface AppTypes {
-		RouteId(): "/" | "/book" | "/profile";
+		RouteId(): "/" | "/book" | "/forgot-password" | "/login" | "/profile" | "/profile/account" | "/register" | "/reset-password" | "/verify";
 		RouteParams(): {
 			
 		};
 		LayoutParams(): {
 			"/": Record<string, never>;
 			"/book": Record<string, never>;
-			"/profile": Record<string, never>
+			"/forgot-password": Record<string, never>;
+			"/login": Record<string, never>;
+			"/profile": Record<string, never>;
+			"/profile/account": Record<string, never>;
+			"/register": Record<string, never>;
+			"/reset-password": Record<string, never>;
+			"/verify": Record<string, never>
 		};
-		Pathname(): "/" | "/book" | "/profile";
+		Pathname(): "/" | "/book" | "/forgot-password" | "/login" | "/profile" | "/profile/account" | "/register" | "/reset-password" | "/verify";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): "/golf_logo.png" | "/robots.txt" | string & {};
 	}

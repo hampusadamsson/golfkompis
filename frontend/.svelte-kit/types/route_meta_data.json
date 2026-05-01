@@ -1,5 +1,11 @@
 {
 	"/": [],
 	"/book": [],
-	"/profile": []
+	"/forgot-password": [],
+	"/login": [],
+	"/profile": [],
+	"/profile/account": [],
+	"/register": [],
+	"/reset-password": [],
+	"/verify": []
 }

@@ -66,22 +66,17 @@
 				aria-describedby={emailTouched && !emailValid ? 'email-error' : undefined}
 			/>
 			{#if emailTouched && !emailValid}
-				<p id="email-error" class="text-destructive text-xs">Ange en giltig e-postadress.</p>
+				<p id="email-error" class="text-xs text-destructive">Ange en giltig e-postadress.</p>
 			{/if}
 		</div>
 
 		<div class="flex flex-col gap-1.5">
 			<Label for="password">Lösenord</Label>
-			<Input
-				id="password"
-				type="password"
-				autocomplete="current-password"
-				bind:value={password}
-			/>
+			<Input id="password" type="password" autocomplete="current-password" bind:value={password} />
 		</div>
 
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-		<p class="text-muted-foreground text-sm">
+		<p class="text-sm text-muted-foreground">
 			<a href="/forgot-password" class="underline underline-offset-4">Glömt lösenordet?</a>
 		</p>
 
@@ -90,7 +85,7 @@
 		</Button>
 
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-		<p class="text-muted-foreground text-center text-sm">
+		<p class="text-center text-sm text-muted-foreground">
 			Inget konto? <a href="/register" class="underline underline-offset-4">Registrera dig</a>
 		</p>
 	</form>

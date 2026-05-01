@@ -6,7 +6,11 @@
 	const profile = $derived(credentials.profile);
 
 	const genderLabel = $derived(
-		profile?.gender === 'M' ? 'Man' : profile?.gender === 'K' || profile?.gender === 'F' ? 'Kvinna' : (profile?.gender ?? '')
+		profile?.gender === 'M'
+			? 'Man'
+			: profile?.gender === 'K' || profile?.gender === 'F'
+				? 'Kvinna'
+				: (profile?.gender ?? '')
 	);
 
 	const initials = $derived(
@@ -15,16 +19,22 @@
 </script>
 
 {#if profile}
-	<section class="border rounded-xl p-4">
+	<section class="rounded-xl border p-4">
 		<h2 class="mb-4 text-xl font-semibold">Profil</h2>
 
 		<!-- Header row: avatar + name on left, golf ID on right -->
-		<div class="flex items-center justify-between gap-4 mb-4">
+		<div class="mb-4 flex items-center justify-between gap-4">
 			<div class="flex items-center gap-4">
 				{#if profile.imageUrl}
-					<img src={profile.imageUrl} alt="Profilbild" class="h-16 w-16 rounded-full object-cover" />
+					<img
+						src={profile.imageUrl}
+						alt="Profilbild"
+						class="h-16 w-16 rounded-full object-cover"
+					/>
 				{:else}
-					<div class="bg-muted rounded-full h-16 w-16 flex items-center justify-center text-xl font-bold text-muted-foreground select-none shrink-0">
+					<div
+						class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted text-xl font-bold text-muted-foreground select-none"
+					>
 						{initials}
 					</div>
 				{/if}
@@ -34,23 +44,23 @@
 		</div>
 
 		<!-- Stats row: evenly distributed -->
-		<div class="grid grid-cols-3 mb-4 divide-x">
-			<div class="text-center px-2">
+		<div class="mb-4 grid grid-cols-3 divide-x">
+			<div class="px-2 text-center">
 				<p class="text-2xl font-bold">{profile.hcp}</p>
 				<p class="text-xs text-muted-foreground">HCP</p>
 			</div>
-			<div class="text-center px-2">
+			<div class="px-2 text-center">
 				<p class="text-2xl font-bold">{profile.age}</p>
 				<p class="text-xs text-muted-foreground">Ålder</p>
 			</div>
-			<div class="text-center px-2">
+			<div class="px-2 text-center">
 				<p class="text-2xl font-bold">{genderLabel}</p>
 				<p class="text-xs text-muted-foreground">Kön</p>
 			</div>
 		</div>
 
 		<!-- Clubs: home club left, member badges right -->
-		<div class="grid gap-4 sm:grid-cols-2 mb-4">
+		<div class="mb-4 grid gap-4 sm:grid-cols-2">
 			{#if profile.homeClubName}
 				<div>
 					<p class="text-sm font-medium">{profile.homeClubName}</p>
@@ -93,7 +103,7 @@
 				{/if}
 			</div>
 			{#if profile.emailAddress}
-				<p class="text-sm text-muted-foreground shrink-0">E-post: {profile.emailAddress}</p>
+				<p class="shrink-0 text-sm text-muted-foreground">E-post: {profile.emailAddress}</p>
 			{/if}
 		</div>
 	</section>

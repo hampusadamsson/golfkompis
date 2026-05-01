@@ -32,9 +32,9 @@
 				data = res;
 			})
 			.catch((err) => {
-			if ((err as { name?: string }).name === 'AbortError') return;
-			errorMessage = getErrorMessage(err);
-		})
+				if ((err as { name?: string }).name === 'AbortError') return;
+				errorMessage = getErrorMessage(err);
+			})
 			.finally(() => {
 				loading = false;
 			});
@@ -47,7 +47,7 @@
 	}
 </script>
 
-<section class="border rounded-xl p-4">
+<section class="rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Vänner</h2>
 		{#if !loading && !errorMessage && data}
@@ -59,8 +59,8 @@
 		<ul class="divide-y">
 			{#each [0, 1, 2, 3] as n (n)}
 				<li class="flex items-center gap-3 py-3">
-					<div class="bg-muted h-4 flex-1 animate-pulse rounded"></div>
-					<div class="bg-muted h-5 w-12 animate-pulse rounded-full"></div>
+					<div class="h-4 flex-1 animate-pulse rounded bg-muted"></div>
+					<div class="h-5 w-12 animate-pulse rounded-full bg-muted"></div>
 				</li>
 			{/each}
 		</ul>
@@ -72,7 +72,7 @@
 	{:else if data}
 		{@const sorted = sortByFirstName(data.friends)}
 		{#if sorted.length === 0}
-			<p class="text-muted-foreground text-sm">Inga vänner ännu.</p>
+			<p class="text-sm text-muted-foreground">Inga vänner ännu.</p>
 		{:else}
 			<ul class="divide-y">
 				{#each sorted as friend (friend.personId)}
@@ -80,7 +80,7 @@
 						<span class="min-w-0 flex-1">
 							<span class="text-sm font-medium">{friend.firstName} {friend.lastName}</span>
 							{#if friend.homeClub}
-								<span class="text-muted-foreground ml-2 text-xs">{friend.homeClub}</span>
+								<span class="ml-2 text-xs text-muted-foreground">{friend.homeClub}</span>
 							{/if}
 						</span>
 						<Badge variant="outline" class="shrink-0 text-xs">

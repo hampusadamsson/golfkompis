@@ -32,7 +32,8 @@
 		} catch (err) {
 			errorMessage = getErrorMessage(err, {
 				conflict: 'Det finns redan ett konto med den e-postadressen.',
-				bad_request: 'Kontrollera att du angett en giltig e-postadress och ett lösenord med minst 8 tecken.'
+				bad_request:
+					'Kontrollera att du angett en giltig e-postadress och ett lösenord med minst 8 tecken.'
 			});
 		} finally {
 			loading = false;
@@ -54,7 +55,7 @@
 			</AlertDescription>
 		</Alert>
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-		<p class="text-muted-foreground mt-4 text-center text-sm">
+		<p class="mt-4 text-center text-sm text-muted-foreground">
 			<a href="/login" class="underline underline-offset-4">Gå till inloggning</a>
 		</p>
 	{:else}
@@ -76,20 +77,15 @@
 					aria-invalid={emailTouched && !emailValid}
 				/>
 				{#if emailTouched && !emailValid}
-					<p class="text-destructive text-xs">Ange en giltig e-postadress.</p>
+					<p class="text-xs text-destructive">Ange en giltig e-postadress.</p>
 				{/if}
 			</div>
 
 			<div class="flex flex-col gap-1.5">
 				<Label for="password">Lösenord</Label>
-				<Input
-					id="password"
-					type="password"
-					autocomplete="new-password"
-					bind:value={password}
-				/>
+				<Input id="password" type="password" autocomplete="new-password" bind:value={password} />
 				{#if password.length > 0 && !passwordValid}
-					<p class="text-destructive text-xs">Lösenordet måste vara minst 8 tecken.</p>
+					<p class="text-xs text-destructive">Lösenordet måste vara minst 8 tecken.</p>
 				{/if}
 			</div>
 
@@ -104,7 +100,7 @@
 					aria-invalid={password2Touched && !passwordsMatch}
 				/>
 				{#if password2Touched && !passwordsMatch}
-					<p class="text-destructive text-xs">Lösenorden stämmer inte överens.</p>
+					<p class="text-xs text-destructive">Lösenorden stämmer inte överens.</p>
 				{/if}
 			</div>
 
@@ -113,7 +109,7 @@
 			</Button>
 
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<p class="text-muted-foreground text-center text-sm">
+			<p class="text-center text-sm text-muted-foreground">
 				Har du redan ett konto? <a href="/login" class="underline underline-offset-4">Logga in</a>
 			</p>
 		</form>

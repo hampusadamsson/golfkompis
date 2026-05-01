@@ -264,9 +264,9 @@
 			aria-multiselectable="true"
 		>
 			{#if loading}
-			<div class="px-3 py-6 text-center text-sm text-muted-foreground">Hämtar banor…</div>
-		{:else if displayed.length === 0}
-			<div class="px-3 py-6 text-center text-sm text-muted-foreground">Inga banor hittades.</div>
+				<div class="px-3 py-6 text-center text-sm text-muted-foreground">Hämtar banor…</div>
+			{:else if displayed.length === 0}
+				<div class="px-3 py-6 text-center text-sm text-muted-foreground">Inga banor hittades.</div>
 			{:else}
 				{#each displayed as course (course.CourseID)}
 					{@const isSelected = selectedSet.has(course.CourseID)}

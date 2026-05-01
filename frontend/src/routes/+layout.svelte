@@ -9,7 +9,8 @@
 
 	$effect(() => {
 		const api = createApiClient({ cookieAuth: true });
-		api.getMe()
+		api
+			.getMe()
 			.then((user) => currentUser.set(user))
 			.catch(() => {
 				// not logged in — leave currentUser.user as null

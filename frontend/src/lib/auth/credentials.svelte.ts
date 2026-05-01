@@ -40,7 +40,8 @@ function loadFromStorage(): Stored | null {
 		// corrupted storage entry
 	}
 	return null;
-}class CredentialsStore {
+}
+class CredentialsStore {
 	username = $state('');
 	password = $state('');
 	profile = $state<Profile | null>(null);

@@ -153,7 +153,10 @@ class AppState:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    from golfkompis.users.db import create_db_and_tables
+
     configure_logging(json_output=True)
+    await create_db_and_tables()
     state = AppState(
         courses=load_courses(),
         session_cache=SessionCache(
@@ -189,6 +192,42 @@ app = FastAPI(
     ),
     version=version("golfkompis"),
     lifespan=lifespan,
+)
+
+# ---------------------------------------------------------------------------
+# User management (fastapi-users) — additive, separate from MinGolf auth
+# ---------------------------------------------------------------------------
+
+from golfkompis.users.manager import (  # noqa: E402
+    auth_backend,  # pyright: ignore[reportUnknownVariableType]
+    fastapi_users,
+)
+from golfkompis.users.schemas import UserCreate, UserRead, UserUpdate  # noqa: E402
+
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend),  # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType]
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_reset_password_router(),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_verify_router(UserRead),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"],
 )
 
 

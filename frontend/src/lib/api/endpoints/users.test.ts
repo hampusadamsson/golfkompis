@@ -14,7 +14,13 @@ describe('users endpoint', () => {
 			age: null
 		});
 		const client = users(req);
-		await client.register({ email: 'a@b.com', password: 'pw', username: null, full_name: null, age: null });
+		await client.register({
+			email: 'a@b.com',
+			password: 'pw',
+			username: null,
+			full_name: null,
+			age: null
+		});
 		expect(req).toHaveBeenCalledWith(
 			'POST',
 			'/auth/register',

@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardDescription,
+		CardHeader,
+		CardTitle
+	} from '$lib/components/ui/card';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import CalendarCheckIcon from '@lucide/svelte/icons/calendar-check';
 	import UsersIcon from '@lucide/svelte/icons/users';
@@ -15,7 +21,8 @@
 		{
 			icon: CalendarCheckIcon,
 			title: 'Full koll',
-			description: 'Se kommande bokningar och avboka med ett klick. Allt på en sida, alltid uppdaterat.'
+			description:
+				'Se kommande bokningar och avboka med ett klick. Allt på en sida, alltid uppdaterat.'
 		},
 		{
 			icon: UsersIcon,
@@ -30,8 +37,8 @@
 	<h1 class="max-w-2xl text-5xl font-bold tracking-tight">Smartare bokning för Min Golf</h1>
 
 	<p class="max-w-xl text-lg text-muted-foreground">
-		Golfkompis hjälper dig hitta starttider, hålla koll på dina bokningar och se kompisarnas spel
-		— byggt ovanpå Min Golf.
+		Golfkompis hjälper dig hitta starttider, hålla koll på dina bokningar och se kompisarnas spel —
+		byggt ovanpå Min Golf.
 	</p>
 
 	<div class="flex flex-wrap justify-center gap-3">
@@ -78,5 +85,5 @@
 		Logga in med ditt Golf-ID — vi använder dina vanliga Min Golf-uppgifter.
 	</p>
 	<Button size="lg" href="/profile">Logga in</Button>
-	<p class="text-muted-foreground text-xs">Golfkompis är inte anslutet till SGF eller Min Golf.</p>
+	<p class="text-xs text-muted-foreground">Golfkompis är inte anslutet till SGF eller Min Golf.</p>
 </section>

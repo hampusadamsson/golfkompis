@@ -17,5 +17,17 @@ class Settings(BaseSettings):
     session_ttl_minutes: int = 30
     session_cache_max: int = 256
 
+    # ---------------------------------------------------------------------------
+    # User management (fastapi-users)
+    # ---------------------------------------------------------------------------
+    # auth_database_url: path is relative to the process cwd.
+    # Set AUTH_DATABASE_URL in production to an absolute path or a proper DSN.
+    auth_secret: str = "changeme-replace-in-production"
+    auth_database_url: str = "sqlite+aiosqlite:///./users.db"
+    auth_cookie_lifetime_seconds: int = 3600
+    auth_cookie_secure: bool = False
+    auth_frontend_verify_url: str = "http://localhost:8000/auth/verify"
+    auth_frontend_reset_url: str = "http://localhost:8000/auth/reset-password"
+
 
 settings = Settings()
