@@ -27,7 +27,7 @@
 		errorMessage = null;
 		try {
 			const api = createApiClient({ cookieAuth: true });
-			await api.register({ email, password, username: null, full_name: null, age: null });
+			await api.register({ email, password, username: null, full_name: null });
 			success = true;
 		} catch (err) {
 			errorMessage = getErrorMessage(err, {

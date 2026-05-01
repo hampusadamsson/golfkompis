@@ -2,7 +2,7 @@
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTableUUID
-from sqlalchemy import Integer, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from golfkompis.users.db import Base
@@ -15,7 +15,12 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     full_name: Mapped[str | None] = mapped_column(
         String(length=128), nullable=True, default=None
     )
-    age: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
+    mingolf_username: Mapped[str | None] = mapped_column(
+        String(length=32), nullable=True, default=None
+    )
+    mingolf_password: Mapped[str | None] = mapped_column(
+        String(length=256), nullable=True, default=None
+    )
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):

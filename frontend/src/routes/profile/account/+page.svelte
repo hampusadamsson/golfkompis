@@ -6,14 +6,28 @@
 	import { createApiClient } from '$lib/api';
 	import { getErrorMessage } from '$lib/api/errors';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
+	import { credentials } from '$lib/auth/credentials.svelte';
+	import { formatGolfId, isValidGolfId } from '$lib/auth/golfId';
 
+	// --- Profile fields ---
 	let username = $state(currentUser.user?.username ?? '');
 	let fullName = $state(currentUser.user?.full_name ?? '');
-	let age = $state<string>(currentUser.user?.age?.toString() ?? '');
 
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state(false);
+
+	// --- MinGolf credentials ---
+	let mingolfUsername = $state(currentUser.user?.mingolf_username ?? credentials.username ?? '');
+	let mingolfPassword = $state(currentUser.user?.mingolf_password ?? credentials.password ?? '');
+	let mingolfShowPassword = $state(false);
+	let mingolfSaving = $state(false);
+	let mingolfError = $state<string | null>(null);
+	let mingolfSuccess = $state(false);
+
+	const mingolfUsernameValid = $derived(
+		mingolfUsername === '' || isValidGolfId(mingolfUsername)
+	);
 
 	async function handleSave(e: SubmitEvent) {
 		e.preventDefault();
@@ -24,8 +38,7 @@
 			const api = createApiClient({ cookieAuth: true });
 			const updated = await api.patchMe({
 				username: username || null,
-				full_name: fullName || null,
-				age: age ? parseInt(age, 10) : null
+				full_name: fullName || null
 			});
 			currentUser.set(updated);
 			saveSuccess = true;
@@ -37,6 +50,50 @@
 		} finally {
 			saving = false;
 		}
+	}
+
+	async function handleMingolfSave(e: SubmitEvent) {
+		e.preventDefault();
+		mingolfSaving = true;
+		mingolfError = null;
+		mingolfSuccess = false;
+		try {
+			const api = createApiClient({ cookieAuth: true });
+			const updated = await api.patchMe({
+				mingolf_username: mingolfUsername || null,
+				mingolf_password: mingolfPassword || null
+			});
+			currentUser.set(updated);
+			// Hydrate local credentials store so MinGolf features work immediately
+			if (updated.mingolf_username && updated.mingolf_password) {
+				const profileApi = createApiClient({
+					credentials: {
+						username: updated.mingolf_username,
+						password: updated.mingolf_password
+					}
+				});
+				try {
+					const profile = await profileApi.getProfile();
+					credentials.set(updated.mingolf_username, updated.mingolf_password, profile, true);
+				} catch {
+					// Saved to account, but MinGolf verification failed — don't block
+				}
+			} else {
+				credentials.clear();
+			}
+			mingolfSuccess = true;
+		} catch (err) {
+			mingolfError = getErrorMessage(err, {
+				unauthorized: 'Du är inte inloggad.'
+			});
+		} finally {
+			mingolfSaving = false;
+		}
+	}
+
+	function handleMingolfUsernameInput(e: Event) {
+		const target = e.target as HTMLInputElement;
+		mingolfUsername = formatGolfId(target.value);
 	}
 </script>
 
@@ -82,13 +139,73 @@
 					<Input id="fullName" type="text" autocomplete="name" bind:value={fullName} />
 				</div>
 
-				<div class="flex flex-col gap-1.5">
-					<Label for="age">Ålder</Label>
-					<Input id="age" type="number" min="1" max="120" bind:value={age} />
-				</div>
-
 				<Button type="submit" disabled={saving}>
 					{#if saving}Sparar…{:else}Spara ändringar{/if}
+				</Button>
+			</form>
+		</section>
+
+		<!-- MinGolf credentials -->
+		<section class="mb-10">
+			<h2 class="mb-2 text-lg font-semibold">MinGolf-koppling</h2>
+			<p class="mb-3 text-sm text-muted-foreground">
+				Valfritt. Krävs för att boka tider och se historik.
+			</p>
+			<form class="flex flex-col gap-4" onsubmit={handleMingolfSave}>
+				{#if mingolfError}
+					<Alert variant="destructive">
+						<AlertDescription>{mingolfError}</AlertDescription>
+					</Alert>
+				{/if}
+				{#if mingolfSuccess}
+					<Alert>
+						<AlertDescription>MinGolf-uppgifter sparade.</AlertDescription>
+					</Alert>
+				{/if}
+
+				<div class="flex flex-col gap-1.5">
+					<Label for="mingolfUsername">Golf-ID</Label>
+					<Input
+						id="mingolfUsername"
+						type="text"
+						inputmode="numeric"
+						autocomplete="username"
+						placeholder="123456-789"
+						value={mingolfUsername}
+						oninput={handleMingolfUsernameInput}
+						aria-invalid={mingolfUsername !== '' && !mingolfUsernameValid}
+					/>
+					{#if mingolfUsername !== '' && !mingolfUsernameValid}
+						<p class="text-xs text-destructive">Format: 123456-789</p>
+					{/if}
+				</div>
+
+				<div class="flex flex-col gap-1.5">
+					<Label for="mingolfPassword">Lösenord</Label>
+					<div class="relative">
+						<Input
+							id="mingolfPassword"
+							type={mingolfShowPassword ? 'text' : 'password'}
+							autocomplete="current-password"
+							bind:value={mingolfPassword}
+							class="pr-10"
+						/>
+						<button
+							type="button"
+							class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+							onclick={() => (mingolfShowPassword = !mingolfShowPassword)}
+							aria-label={mingolfShowPassword ? 'Dölj lösenord' : 'Visa lösenord'}
+						>
+							<span class="text-xs">{mingolfShowPassword ? 'Dölj' : 'Visa'}</span>
+						</button>
+					</div>
+				</div>
+
+				<Button
+					type="submit"
+					disabled={mingolfSaving || (mingolfUsername !== '' && !mingolfUsernameValid)}
+				>
+					{#if mingolfSaving}Sparar…{:else}Spara MinGolf-uppgifter{/if}
 				</Button>
 			</form>
 		</section>
@@ -99,7 +216,7 @@
 			<p class="mb-3 text-sm text-muted-foreground">
 				Begär en länk via e-post för att ange ett nytt lösenord.
 			</p>
-			<!-- eslint-disable-next-line svelte/no-navigation-without-restore -->
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a href="/forgot-password">
 				<Button variant="outline">Skicka återställningslänk</Button>
 			</a>

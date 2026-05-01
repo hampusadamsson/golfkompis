@@ -11,15 +11,15 @@ describe('users endpoint', () => {
 			is_verified: false,
 			username: null,
 			full_name: null,
-			age: null
+			mingolf_username: null,
+			mingolf_password: null
 		});
 		const client = users(req);
 		await client.register({
 			email: 'a@b.com',
 			password: 'pw',
 			username: null,
-			full_name: null,
-			age: null
+			full_name: null
 		});
 		expect(req).toHaveBeenCalledWith(
 			'POST',
@@ -37,7 +37,8 @@ describe('users endpoint', () => {
 			is_verified: false,
 			username: null,
 			full_name: null,
-			age: null
+			mingolf_username: null,
+			mingolf_password: null
 		});
 		const client = users(req);
 		await client.getMe();

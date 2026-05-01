@@ -111,6 +111,26 @@ async def test_patch_me(test_app: Any) -> None:
 
 
 @pytest.mark.asyncio
+async def test_patch_mingolf_creds(test_app: Any) -> None:
+    async with _fresh_client(test_app) as c:
+        await c.post(
+            "/auth/register", json={"email": "mg@test.com", "password": "secret1234"}
+        )
+        await c.post(
+            "/auth/login",
+            data={"username": "mg@test.com", "password": "secret1234"},
+        )
+        r = await c.patch(
+            "/users/me",
+            json={"mingolf_username": "123456-789", "mingolf_password": "mypass"},
+        )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["mingolf_username"] == "123456-789"
+    assert data["mingolf_password"] == "mypass"
+
+
+@pytest.mark.asyncio
 async def test_logout(test_app: Any) -> None:
     async with _fresh_client(test_app) as c:
         await c.post(

@@ -8,7 +8,8 @@ export interface AppUser {
 	is_verified: boolean;
 	username: string | null;
 	full_name: string | null;
-	age: number | null;
+	mingolf_username: string | null;
+	mingolf_password: string | null;
 }
 
 export interface UserCreate {
@@ -16,13 +17,13 @@ export interface UserCreate {
 	password: string;
 	username: string | null;
 	full_name: string | null;
-	age: number | null;
 }
 
 export interface UserUpdate {
 	username?: string | null;
 	full_name?: string | null;
-	age?: number | null;
+	mingolf_username?: string | null;
+	mingolf_password?: string | null;
 }
 
 export function users(req: Requester) {
