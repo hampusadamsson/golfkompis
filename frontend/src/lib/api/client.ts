@@ -5,6 +5,7 @@ import { bookings } from './endpoints/bookings.js';
 import { history } from './endpoints/history.js';
 import { profile } from './endpoints/profile.js';
 import { friends } from './endpoints/friends.js';
+import { users } from './endpoints/users.js';
 
 export interface ApiCredentials {
 	username: string;
@@ -28,19 +29,26 @@ export interface ApiConfig {
 	 * @default globalThis.fetch
 	 */
 	fetch?: typeof globalThis.fetch;
+	/**
+	 * If true, all requests include `credentials: 'include'` for cookie-based auth.
+	 * @default false
+	 */
+	cookieAuth?: boolean;
 }
 
 // Internal option shape passed from endpoint functions into request()
 interface RequestOptions {
 	query?: object;
 	body?: unknown;
+	rawBody?: string;
+	contentType?: string;
 	requireAuth?: boolean;
 	signal?: AbortSignal;
 }
 
 /** Internal type for the request helper bound to a specific client config. */
 export type Requester = <T>(
-	method: 'GET' | 'POST' | 'DELETE',
+	method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
 	path: string,
 	opts?: RequestOptions
 ) => Promise<T>;
@@ -61,7 +69,7 @@ function buildQuery(params: object): string {
 
 function createRequester(config: Required<ApiConfig>): Requester {
 	return async function request<T>(
-		method: 'GET' | 'POST' | 'DELETE',
+		method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
 		path: string,
 		opts: RequestOptions = {}
 	): Promise<T> {
@@ -88,18 +96,21 @@ function createRequester(config: Required<ApiConfig>): Requester {
 			headers['X-Mingolf-Username'] = config.credentials.username;
 			headers['X-Mingolf-Password'] = config.credentials.password;
 		}
-		if (body !== undefined) {
+		if (opts.contentType) {
+			headers['Content-Type'] = opts.contentType;
+		} else 		if (opts.contentType) {
+			headers['Content-Type'] = opts.contentType;
+		} else if (body !== undefined) {
 			headers['Content-Type'] = 'application/json';
 		}
-
-		// Fetch
 		let res: Response;
 		try {
 			res = await config.fetch(url, {
 				method,
 				headers,
-				body: body !== undefined ? JSON.stringify(body) : undefined,
-				signal
+				body: opts.rawBody ?? (body !== undefined ? JSON.stringify(body) : undefined),
+				signal,
+				credentials: config.cookieAuth ? 'include' : 'same-origin'
 			});
 		} catch (err) {
 			throw ApiError.network(err);
@@ -126,13 +137,15 @@ type BookingsClient = ReturnType<typeof bookings>;
 type HistoryClient = ReturnType<typeof history>;
 type ProfileClient = ReturnType<typeof profile>;
 type FriendsClient = ReturnType<typeof friends>;
+type UsersClient = ReturnType<typeof users>;
 
 export type ApiClient = MetaClient &
 	CoursesClient &
 	BookingsClient &
 	HistoryClient &
 	ProfileClient &
-	FriendsClient;
+	FriendsClient &
+	UsersClient;
 
 // ── Factory ─────────────────────────────────────────────────────────────────
 
@@ -172,7 +185,8 @@ export function createApiClient(config: ApiConfig = {}): ApiClient {
 	const resolved: Required<ApiConfig> = {
 		baseUrl: config.baseUrl ?? '',
 		credentials: config.credentials ?? { username: '', password: '' },
-		fetch: config.fetch ?? globalThis.fetch
+		fetch: config.fetch ?? globalThis.fetch,
+		cookieAuth: config.cookieAuth ?? false
 	};
 
 	const req = createRequester(resolved);
@@ -183,6 +197,7 @@ export function createApiClient(config: ApiConfig = {}): ApiClient {
 		...bookings(req),
 		...history(req),
 		...profile(req),
-		...friends(req)
+		...friends(req),
+		...users(req)
 	};
 }
