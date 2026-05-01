@@ -7,13 +7,13 @@ from pydantic import Field
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
-    username: str
+    username: str | None = None
     full_name: str | None = None
     age: int | None = None
 
 
 class UserCreate(schemas.BaseUserCreate):
-    username: str
+    username: str | None = None
     full_name: str | None = None
     age: int | None = Field(default=None, ge=0, le=150)
 
