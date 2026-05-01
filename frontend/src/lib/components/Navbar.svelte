@@ -1,30 +1,29 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
-	import {
-		Dialog,
-		DialogContent,
-		DialogHeader,
-		DialogTitle,
-		DialogTrigger
-	} from '$lib/components/ui/dialog';
-	import CredentialsForm from './CredentialsForm.svelte';
-	import { credentials } from '$lib/auth/credentials.svelte';
-	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { createApiClient } from '$lib/api';
+	import { currentUser } from '$lib/auth/currentUser.svelte';
+	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte';
 
 	let loginOpen = $state(false);
 
-	function handleSignIn() {
-		loginOpen = false;
-	}
-
 	async function handleAppLogout() {
-		const api = createApiClient({ cookieAuth: true });
+		const api = createApiClient();
 		try {
 			await api.logout();
 		} finally {
 			currentUser.clear();
+		}
+	}
+
+	async function handleMingolfLogout() {
+		const api = createApiClient();
+		try {
+			const updated = await api.patchMyMingolf({ mingolf_username: null, mingolf_password: null });
+			currentUser.set(updated);
+			mingolfProfile.clear();
+		} catch {
+			// ignore errors — user can try again
 		}
 	}
 </script>
@@ -90,26 +89,12 @@
 		{/if}
 
 		<!-- MinGolf auth area -->
-		{#if credentials.profile}
+		{#if mingolfProfile.profile}
 			<span class="hidden text-sm text-muted-foreground sm:inline">
-				{credentials.profile.firstName}
-				{credentials.profile.lastName} · HCP {credentials.profile.hcp}
+				{mingolfProfile.profile.firstName}
+				{mingolfProfile.profile.lastName} · HCP {mingolfProfile.profile.hcp}
 			</span>
-			<Button variant="outline" size="sm" onclick={() => credentials.clear()}>MinGolf ut</Button>
-		{:else}
-			<Dialog bind:open={loginOpen}>
-				<DialogTrigger>
-					{#snippet child({ props })}
-						<Button size="sm" {...props}>MinGolf in</Button>
-					{/snippet}
-				</DialogTrigger>
-				<DialogContent class="sm:max-w-md">
-					<DialogHeader>
-						<DialogTitle>Logga in på MinGolf</DialogTitle>
-					</DialogHeader>
-					<CredentialsForm onSubmit={handleSignIn} />
-				</DialogContent>
-			</Dialog>
+			<Button variant="outline" size="sm" onclick={handleMingolfLogout}>MinGolf ut</Button>
 		{/if}
 	</div>
 </header>

@@ -18,7 +18,6 @@
 
 	import { createApiClient, getErrorMessage } from '$lib/api';
 	import type { Booking } from '$lib/api';
-	import { credentials } from '$lib/auth/credentials.svelte';
 	import { dateFmt, formatSlotTime } from '$lib/format';
 
 	interface Props {
@@ -39,16 +38,14 @@
 
 	// ── Fetch ────────────────────────────────────────────────────────────────
 	$effect(() => {
-		const creds = credentials.value;
 		// Read refreshKey to register it as a reactive dependency
 		void refreshKey;
-		if (!creds) return;
 
 		const controller = new AbortController();
 		loading = true;
 		errorMessage = null;
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 		api
 			.listBookings({}, { signal: controller.signal })
 			.then((data) => {
@@ -77,14 +74,9 @@
 
 		const bookingId = round.bookingInfo.bookingId;
 
-		const creds = credentials.value;
-		// Guard before setting cancellingId so the button doesn't get stuck
-		// if we return early due to missing credentials.
-		if (!creds) return;
-
 		cancellingId = bookingId;
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 		try {
 			await api.cancelBooking(bookingId);
 			upcoming = upcoming.filter((b) => b.bookingInfo?.bookingId !== bookingId);
@@ -104,14 +96,12 @@
 <div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Kommande bokningar</h2>
-		{#if !loading && !errorMessage && credentials.value}
-			<Badge variant="secondary" class="text-xs">{upcoming.length} bokningar</Badge>
-		{/if}
+	{#if !loading && !errorMessage}
+		<Badge variant="secondary" class="text-xs">{upcoming.length} bokningar</Badge>
+	{/if}
 	</div>
 
-	{#if !credentials.value}
-		<p class="text-sm text-muted-foreground">Logga in för att se dina kommande bokningar.</p>
-	{:else if loading}
+	{#if loading}
 		<ul class="space-y-2">
 			{#each { length: 3 }, i (i)}
 				<li class="h-9 animate-pulse rounded bg-muted"></li>

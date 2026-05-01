@@ -5,7 +5,6 @@
 
 	import { createApiClient, getErrorMessage } from '$lib/api';
 	import type { FriendOverview } from '$lib/api';
-	import { credentials } from '$lib/auth/credentials.svelte';
 
 	interface Props {
 		apiBaseUrl?: string;
@@ -18,14 +17,11 @@
 	let data = $state<FriendOverview | null>(null);
 
 	$effect(() => {
-		const creds = credentials.value;
-		if (!creds) return;
-
 		const controller = new AbortController();
 		loading = true;
 		errorMessage = null;
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 		api
 			.getFriends({ signal: controller.signal })
 			.then((res) => {

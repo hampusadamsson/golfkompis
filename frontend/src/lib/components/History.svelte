@@ -5,7 +5,6 @@
 
 	import { createApiClient, getErrorMessage } from '$lib/api';
 	import type { Booking } from '$lib/api';
-	import { credentials } from '$lib/auth/credentials.svelte';
 	import { dateFmt, formatSlotTime, todayInTz } from '$lib/format';
 
 	interface Props {
@@ -31,14 +30,11 @@
 
 	// ── Fetch ────────────────────────────────────────────────────────────────
 	$effect(() => {
-		const creds = credentials.value;
-		if (!creds) return;
-
 		const controller = new AbortController();
 		loading = true;
 		errorMessage = null;
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 		api
 			.getHistory({ from, to }, { signal: controller.signal })
 			.then((data) => {
@@ -59,14 +55,12 @@
 <div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Rundor – senaste 12 månaderna</h2>
-		{#if !loading && !errorMessage && credentials.value}
-			<Badge variant="secondary" class="text-xs">{rounds.length} rundor</Badge>
-		{/if}
+	{#if !loading && !errorMessage}
+		<Badge variant="secondary" class="text-xs">{rounds.length} rundor</Badge>
+	{/if}
 	</div>
 
-	{#if !credentials.value}
-		<p class="text-sm text-muted-foreground">Logga in för att se din rundhistorik.</p>
-	{:else if loading}
+	{#if loading}
 		<ul class="space-y-2">
 			{#each { length: 5 }, i (i)}
 				<li class="h-9 animate-pulse rounded bg-muted"></li>

@@ -6,7 +6,7 @@
 	import { createApiClient } from '$lib/api';
 	import { getErrorMessage } from '$lib/api/errors';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
-	import { credentials } from '$lib/auth/credentials.svelte';
+	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte';
 	import { formatGolfId, isValidGolfId } from '$lib/auth/golfId';
 
 	// --- Profile fields ---
@@ -18,8 +18,8 @@
 	let saveSuccess = $state(false);
 
 	// --- MinGolf credentials ---
-	let mingolfUsername = $state(currentUser.user?.mingolf_username ?? credentials.username ?? '');
-	let mingolfPassword = $state(currentUser.user?.mingolf_password ?? credentials.password ?? '');
+	let mingolfUsername = $state(currentUser.user?.mingolf_username ?? '');
+	let mingolfPassword = $state(currentUser.user?.mingolf_password ?? '');
 	let mingolfShowPassword = $state(false);
 	let mingolfSaving = $state(false);
 	let mingolfError = $state<string | null>(null);
@@ -35,7 +35,7 @@
 		saveError = null;
 		saveSuccess = false;
 		try {
-			const api = createApiClient({ cookieAuth: true });
+			const api = createApiClient();
 			const updated = await api.patchMe({
 				username: username || null,
 				full_name: fullName || null
@@ -58,28 +58,16 @@
 		mingolfError = null;
 		mingolfSuccess = false;
 		try {
-			const api = createApiClient({ cookieAuth: true });
-			const updated = await api.patchMe({
+			const api = createApiClient();
+			const updated = await api.patchMyMingolf({
 				mingolf_username: mingolfUsername || null,
 				mingolf_password: mingolfPassword || null
 			});
 			currentUser.set(updated);
-			// Hydrate local credentials store so MinGolf features work immediately
-			if (updated.mingolf_username && updated.mingolf_password) {
-				const profileApi = createApiClient({
-					credentials: {
-						username: updated.mingolf_username,
-						password: updated.mingolf_password
-					}
-				});
-				try {
-					const profile = await profileApi.getProfile();
-					credentials.set(updated.mingolf_username, updated.mingolf_password, profile, true);
-				} catch {
-					// Saved to account, but MinGolf verification failed — don't block
-				}
+			if (updated.mingolf_username) {
+				await mingolfProfile.load(api);
 			} else {
-				credentials.clear();
+				mingolfProfile.clear();
 			}
 			mingolfSuccess = true;
 		} catch (err) {

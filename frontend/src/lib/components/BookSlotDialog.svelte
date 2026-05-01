@@ -16,7 +16,6 @@
 
 	import { createApiClient, ApiError, getErrorMessage } from '$lib/api';
 	import type { Slot, Course } from '$lib/api';
-	import { credentials } from '$lib/auth/credentials.svelte';
 	import { formatDateLong, formatSlotTime, flexColorStyle } from '$lib/format';
 
 	interface Props {
@@ -51,8 +50,6 @@
 
 	async function handleBook() {
 		if (!slot) return;
-		const creds = credentials.value;
-		if (!creds) return;
 
 		// Freeze the slot reference now — the parent may null out `slot` before
 		// the async request completes (e.g. rapid reopen scenario).
@@ -61,7 +58,7 @@
 		booking = true;
 		errorMessage = null;
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 		try {
 			await api.book({ slot_id: targetSlot.id });
 			bookedSlot = targetSlot;

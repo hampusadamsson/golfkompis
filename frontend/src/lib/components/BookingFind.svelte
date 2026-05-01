@@ -10,7 +10,6 @@
 
 	import { createApiClient, ApiError, getErrorMessage } from '$lib/api';
 	import type { Slot, Course } from '$lib/api';
-	import { credentials } from '$lib/auth/credentials.svelte';
 	import { todayInTz, formatSlotTime, flexColorStyle } from '$lib/format';
 	import CourseMultiSelect from './CourseMultiSelect.svelte';
 	import BookSlotDialog from './BookSlotDialog.svelte';
@@ -60,8 +59,7 @@
 
 	// ── Search ───────────────────────────────────────────────────────────────
 	async function search() {
-		const creds = credentials.value;
-		if (!creds || selectedCourses.length === 0) return;
+		if (selectedCourses.length === 0) return;
 
 		controller?.abort();
 		controller = new AbortController();
@@ -74,7 +72,7 @@
 		searched = true;
 		results = [];
 
-		const api = createApiClient({ baseUrl: apiBaseUrl, credentials: creds });
+		const api = createApiClient({ baseUrl: apiBaseUrl });
 
 		const settled = await Promise.allSettled(
 			selectedCourses.map((course) =>
@@ -133,11 +131,8 @@
 <section class="rounded-xl border p-4">
 	<h2 class="mb-4 text-xl font-semibold">Hitta starttider</h2>
 
-	{#if !credentials.value}
-		<p class="text-sm text-muted-foreground">Logga in för att söka starttider.</p>
-	{:else}
-		<!-- Controls -->
-		<div class="space-y-4">
+	<!-- Controls -->
+	<div class="space-y-4">
 			<CourseMultiSelect bind:selected={courseIds} {apiBaseUrl} onChange={handleCoursesChange} />
 
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -341,7 +336,6 @@
 				</div>
 			{/if}
 		</div>
-	{/if}
 </section>
 
 <BookSlotDialog
