@@ -10,11 +10,22 @@
 	} from '$lib/components/ui/dialog';
 	import CredentialsForm from './CredentialsForm.svelte';
 	import { credentials } from '$lib/auth/credentials.svelte';
+	import { currentUser } from '$lib/auth/currentUser.svelte';
+	import { createApiClient } from '$lib/api';
 
 	let loginOpen = $state(false);
 
 	function handleSignIn() {
 		loginOpen = false;
+	}
+
+	async function handleAppLogout() {
+		const api = createApiClient({ cookieAuth: true });
+		try {
+			await api.logout();
+		} finally {
+			currentUser.clear();
+		}
 	}
 </script>
 
@@ -51,28 +62,49 @@
 			>
 				Boka
 			</a>
+			<a
+				href={currentUser.isLoggedIn ? '/profile/account' : '/login'}
+				class={page.url.pathname.startsWith('/profile/account') || (page.url.pathname as string) === '/login'
+					? 'text-foreground font-medium'
+					: 'text-muted-foreground hover:text-foreground transition-colors'}
+			>
+				Konto
+			</a>
 		</nav>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 		<div class="flex-1"></div>
 
-		<!-- Auth area -->
+		<!-- App auth area -->
+		{#if currentUser.isLoggedIn}
+			<span class="text-muted-foreground hidden text-sm sm:inline">
+				{currentUser.user?.username ?? currentUser.user?.email}
+			</span>
+			<Button variant="ghost" size="sm" onclick={handleAppLogout}>Logga ut konto</Button>
+		{:else}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+			<a href="/login">
+				<Button variant="ghost" size="sm">Logga in konto</Button>
+			</a>
+		{/if}
+
+		<!-- MinGolf auth area -->
 		{#if credentials.profile}
 			<span class="text-muted-foreground hidden text-sm sm:inline">
 				{credentials.profile.firstName}
 				{credentials.profile.lastName} · HCP {credentials.profile.hcp}
 			</span>
-			<Button variant="outline" size="sm" onclick={() => credentials.clear()}>Logga ut</Button>
+			<Button variant="outline" size="sm" onclick={() => credentials.clear()}>MinGolf ut</Button>
 		{:else}
 			<Dialog bind:open={loginOpen}>
 				<DialogTrigger>
 					{#snippet child({ props })}
-						<Button size="sm" {...props}>Logga in</Button>
+						<Button size="sm" {...props}>MinGolf in</Button>
 					{/snippet}
 				</DialogTrigger>
 				<DialogContent class="sm:max-w-md">
 					<DialogHeader>
-						<DialogTitle>Logga in</DialogTitle>
+						<DialogTitle>Logga in på MinGolf</DialogTitle>
 					</DialogHeader>
 					<CredentialsForm onSubmit={handleSignIn} />
 				</DialogContent>
