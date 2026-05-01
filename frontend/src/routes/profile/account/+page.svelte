@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -15,10 +14,6 @@
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state(false);
-
-	let deleting = $state(false);
-	let deleteError = $state<string | null>(null);
-	let confirmDelete = $state(false);
 
 	async function handleSave(e: SubmitEvent) {
 		e.preventDefault();
@@ -41,20 +36,6 @@
 			});
 		} finally {
 			saving = false;
-		}
-	}
-
-	async function handleDelete() {
-		deleting = true;
-		deleteError = null;
-		try {
-			const api = createApiClient({ cookieAuth: true });
-			await api.deleteMe();
-			currentUser.clear();
-			await goto('/');
-		} catch (err) {
-			deleteError = getErrorMessage(err);
-			deleting = false;
 		}
 	}
 </script>
@@ -118,40 +99,10 @@
 			<p class="mb-3 text-sm text-muted-foreground">
 				Begär en länk via e-post för att ange ett nytt lösenord.
 			</p>
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+			<!-- eslint-disable-next-line svelte/no-navigation-without-restore -->
 			<a href="/forgot-password">
 				<Button variant="outline">Skicka återställningslänk</Button>
 			</a>
-		</section>
-
-		<!-- Danger zone -->
-		<section class="rounded-lg border border-destructive p-6">
-			<h2 class="mb-2 text-lg font-semibold text-destructive">Radera konto</h2>
-			<p class="mb-4 text-sm text-muted-foreground">
-				Ditt konto och all data raderas permanent. Åtgärden kan inte ångras.
-			</p>
-
-			{#if deleteError}
-				<Alert variant="destructive" class="mb-4">
-					<AlertDescription>{deleteError}</AlertDescription>
-				</Alert>
-			{/if}
-
-			{#if !confirmDelete}
-				<Button variant="destructive" onclick={() => (confirmDelete = true)}>
-					Radera mitt konto
-				</Button>
-			{:else}
-				<p class="mb-3 text-sm font-medium text-destructive">
-					Är du säker? Det går inte att ångra.
-				</p>
-				<div class="flex gap-3">
-					<Button variant="destructive" onclick={handleDelete} disabled={deleting}>
-						{#if deleting}Raderar…{:else}Ja, radera{/if}
-					</Button>
-					<Button variant="outline" onclick={() => (confirmDelete = false)}>Avbryt</Button>
-				</div>
-			{/if}
 		</section>
 	{/if}
 </main>
