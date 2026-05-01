@@ -20,5 +20,3 @@ class UserCreate(schemas.BaseUserCreate):
 class UserUpdate(schemas.BaseUserUpdate):
     username: str | None = None
     full_name: str | None = None
-    mingolf_username: str | None = None
-    mingolf_password: str | None = None

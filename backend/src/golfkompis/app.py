@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import date, time, timedelta
 from importlib.metadata import version
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import requests
 import structlog
@@ -198,6 +198,9 @@ app = FastAPI(
 # User management (fastapi-users) — additive, separate from MinGolf auth
 # ---------------------------------------------------------------------------
 
+from golfkompis.users.db import (  # noqa: E402
+    get_user_db,  # pyright: ignore[reportUnknownVariableType]
+)
 from golfkompis.users.manager import (  # noqa: E402
     auth_backend,  # pyright: ignore[reportUnknownVariableType]
     current_active_user,
@@ -800,6 +803,49 @@ def friends(golf: GolfClient) -> FriendOverview:
         ``502`` on upstream MinGolf errors.
     """
     return golf.fetch_friends()
+
+
+# ---------------------------------------------------------------------------
+# MinGolf credentials — verify-before-persist route
+# ---------------------------------------------------------------------------
+
+
+class MingolfCredentialsUpdate(BaseModel):
+    mingolf_username: str | None = None
+    mingolf_password: str | None = None
+
+
+@app.patch(
+    "/users/me/mingolf",
+    tags=["users"],
+    summary="Link or unlink MinGolf credentials",
+    response_model=UserRead,
+)
+async def patch_my_mingolf(
+    body: MingolfCredentialsUpdate,
+    user: Annotated[User, Depends(current_active_user)],
+    user_db: Annotated[Any, Depends(get_user_db)],  # pyright: ignore[reportUnknownArgumentType]
+) -> User:
+    """Save (and verify) or clear the caller's MinGolf credentials."""
+    has_user = bool(body.mingolf_username)
+    has_pass = bool(body.mingolf_password)
+
+    if has_user != has_pass:
+        raise HTTPException(status_code=422, detail="mingolf_incomplete")
+
+    if has_user and has_pass:
+        try:
+            MinGolf().login(body.mingolf_username, body.mingolf_password)  # type: ignore[arg-type]
+        except InvalidCredentials as e:
+            raise HTTPException(status_code=422, detail="mingolf_invalid") from e
+
+    return await user_db.update(
+        user,
+        {  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
+            "mingolf_username": body.mingolf_username,
+            "mingolf_password": body.mingolf_password,
+        },
+    )
 
 
 # ---------------------------------------------------------------------------

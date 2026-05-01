@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from asgi_lifespan import LifespanManager
@@ -101,13 +101,14 @@ async def test_get_profile_does_not_return_412_when_creds_stored() -> None:
                 transport=ASGITransport(app=app), base_url="http://test"
             ) as client:
                 await _register_and_login(client, "linked@test.com", "password123")
-                r = await client.patch(
-                    "/users/me",
-                    json={
-                        "mingolf_username": "123456-789",
-                        "mingolf_password": "mypass",
-                    },
-                )
+                with patch("golfkompis.mingolf.MinGolf.login"):
+                    r = await client.patch(
+                        "/users/me/mingolf",
+                        json={
+                            "mingolf_username": "123456-789",
+                            "mingolf_password": "mypass",
+                        },
+                    )
                 assert r.status_code == 200
                 r = await client.get("/api/v1/profile")
         finally:

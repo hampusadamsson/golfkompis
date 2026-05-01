@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from typing import Any
+from unittest.mock import patch
 
 import httpx
 import pytest
@@ -120,10 +121,11 @@ async def test_patch_mingolf_creds(test_app: Any) -> None:
             "/auth/login",
             data={"username": "mg@test.com", "password": "secret1234"},
         )
-        r = await c.patch(
-            "/users/me",
-            json={"mingolf_username": "123456-789", "mingolf_password": "mypass"},
-        )
+        with patch("golfkompis.mingolf.MinGolf.login"):
+            r = await c.patch(
+                "/users/me/mingolf",
+                json={"mingolf_username": "123456-789", "mingolf_password": "mypass"},
+            )
     assert r.status_code == 200
     data = r.json()
     assert data["mingolf_username"] == "123456-789"
