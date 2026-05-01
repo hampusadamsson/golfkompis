@@ -175,7 +175,10 @@
 			<!-- Optional time range -->
 			<div class="grid grid-cols-2 gap-3">
 				<div class="flex flex-col gap-1.5">
-					<Label for="bf-start">Tidigaste starttid <span class="text-muted-foreground text-xs">(valfritt)</span></Label>
+					<Label for="bf-start" class="whitespace-nowrap">
+						<span class="text-muted-foreground block text-xs leading-none">Starttid</span>
+						<span>Tidigast <span class="text-muted-foreground text-xs">(valfritt)</span></span>
+					</Label>
 					<input
 						id="bf-start"
 						type="time"
@@ -184,7 +187,10 @@
 					/>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="bf-stop">Senaste starttid <span class="text-muted-foreground text-xs">(valfritt)</span></Label>
+					<Label for="bf-stop" class="whitespace-nowrap">
+						<span class="text-muted-foreground block text-xs leading-none">Starttid</span>
+						<span>Senast <span class="text-muted-foreground text-xs">(valfritt)</span></span>
+					</Label>
 					<input
 						id="bf-stop"
 						type="time"

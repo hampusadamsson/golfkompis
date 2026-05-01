@@ -23,7 +23,12 @@ from golfkompis.config import settings
 from golfkompis.course import Courses, load_courses
 from golfkompis.domain import Booking, Course, FriendOverview, Profile, Slot
 from golfkompis.logging import configure_logging
-from golfkompis.mingolf import BookingNotFound, CancelConflict, MinGolf
+from golfkompis.mingolf import (
+    BookingNotFound,
+    CancelConflict,
+    InvalidCredentials,
+    MinGolf,
+)
 
 _AUTH_HEADER_NOTE = (
     "Credentials authenticate against MinGolf on first use; the resulting session "
@@ -331,6 +336,8 @@ def get_authenticated_client(
     state: AppState = request.app.state.app_state
     try:
         return state.session_cache.get_or_login(x_mingolf_username, x_mingolf_password)
+    except InvalidCredentials as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except requests.HTTPError as e:

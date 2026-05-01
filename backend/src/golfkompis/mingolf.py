@@ -49,11 +49,32 @@ class CancelConflict(RuntimeError):
     """Raised when a booking_id cannot be located in the slot bookings view."""
 
 
+class InvalidCredentials(ValueError):
+    """Raised when MinGolf rejects the supplied username/password (HTTP 400)."""
+
+
 def _default_headers() -> dict[str, str]:
     return {
         "User-Agent": _MINGOLF_USER_AGENT,
         "Content-Type": "application/json; charset=utf-8",
     }
+
+
+def _extract_login_error(r: requests.Response) -> str | None:
+    """Return the human-readable error string from a MinGolf 400 login response.
+
+    MinGolf encodes the message as a JSON-encoded bare string, a dict with a
+    ``Message`` key, or plain text. Returns ``None`` if nothing useful is found.
+    """
+    try:
+        body: object = r.json()
+    except ValueError:
+        return r.text.strip() or None
+    if isinstance(body, str):
+        return body
+    if isinstance(body, dict):
+        return body.get("Message") or body.get("message")  # pyright: ignore[reportUnknownMemberType,reportReturnType,reportUnknownVariableType]
+    return None
 
 
 class MinGolf:
@@ -88,19 +109,28 @@ class MinGolf:
 
         Raises
         ------
+        InvalidCredentials
+            If MinGolf returns HTTP 400 (wrong username or password) or if the
+            response succeeds at HTTP level but contains no access token.
         requests.HTTPError
-            If the server returns a non-2xx status code.
-        ValueError
-            If login succeeds at HTTP level but the credentials are rejected.
+            If the server returns any other non-2xx status code.
         """
         payload = {"GolfId": username, "Password": password}
         r = self.session.post(LOGIN_URL, json=payload, timeout=DEFAULT_TIMEOUT)
+
+        if r.status_code == 400:
+            message = _extract_login_error(r) or "fel användarnamn eller lösenord"
+            raise InvalidCredentials(message)
+
         r.raise_for_status()
         body: object = r.json()  # pyright: ignore[reportAny]
         if not isinstance(body, dict) or not body.get("accessToken", False):  # pyright: ignore[reportUnknownMemberType]
-            raise ValueError(
-                f"MinGolf login rejected: {body.get('Message', 'unknown error') if isinstance(body, dict) else body}"  # pyright: ignore[reportUnknownMemberType]
+            msg = (  # pyright: ignore[reportUnknownVariableType]
+                body.get("Message", "unknown error")  # pyright: ignore[reportUnknownMemberType]
+                if isinstance(body, dict)
+                else str(body)
             )
+            raise InvalidCredentials(f"MinGolf login rejected: {msg}")
         self._authenticated = True
 
     def fetch_course_schedule(self, course: Course, date: date) -> CourseSchedule:

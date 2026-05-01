@@ -38,8 +38,8 @@
 			<a
 				href="/profile"
 				class={page.url.pathname === '/profile'
-					? 'text-foreground font-medium'
-					: 'text-muted-foreground hover:text-foreground transition-colors'}
+					? 'text-foreground whitespace-nowrap font-medium'
+					: 'text-muted-foreground hover:text-foreground whitespace-nowrap transition-colors'}
 			>
 				Min sida
 			</a>
