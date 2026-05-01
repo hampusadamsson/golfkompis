@@ -9,8 +9,8 @@ from golfkompis.users.db import Base
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    username: Mapped[str] = mapped_column(
-        String(length=64), unique=True, index=True, nullable=False
+    username: Mapped[str | None] = mapped_column(
+        String(length=64), unique=True, index=True, nullable=True, default=None
     )
     full_name: Mapped[str | None] = mapped_column(
         String(length=128), nullable=True, default=None
