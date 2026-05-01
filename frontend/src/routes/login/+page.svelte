@@ -24,7 +24,7 @@
 		loading = true;
 		errorMessage = null;
 		try {
-			const api = createApiClient({ cookieAuth: true });
+			const api = createApiClient();
 			await api.login({ username: email, password });
 			const user = await api.getMe();
 			currentUser.set(user);

@@ -26,7 +26,7 @@
 		loading = true;
 		errorMessage = null;
 		try {
-			const api = createApiClient({ cookieAuth: true });
+			const api = createApiClient();
 			await api.resetPassword({ token, password });
 			await goto('/login?reset=1');
 		} catch (err) {

@@ -26,7 +26,7 @@
 		loading = true;
 		errorMessage = null;
 		try {
-			const api = createApiClient({ cookieAuth: true });
+			const api = createApiClient();
 			await api.register({ email, password, username: null, full_name: null });
 			success = true;
 		} catch (err) {

@@ -5,7 +5,7 @@
 //   import type { Slot, Booking, Profile, Course, Friend } from '$lib/api';
 
 export { createApiClient } from './client.js';
-export type { ApiClient, ApiConfig, ApiCredentials } from './client.js';
+export type { ApiClient, ApiConfig } from './client.js';
 
 export { ApiError, getErrorMessage } from './errors.js';
 export type { ApiErrorCode } from './errors.js';

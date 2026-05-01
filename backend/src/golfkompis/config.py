@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     session_ttl_minutes: int = 30
     session_cache_max: int = 256
 
+    # EMAIL
+
+    mail_username: str = ""
+    mail_password: str = ""
+    mail_from: str = "noreply@example.com"
+    mail_port: int = 1025
+    mail_server: str = "localhost"
+    mail_starttls: bool = False
+    mail_ssl_tls: bool = False
+
     # ---------------------------------------------------------------------------
     # User management (fastapi-users)
     # ---------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 		loading = true;
 		errorMessage = null;
 		try {
-			const api = createApiClient({ cookieAuth: true });
+			const api = createApiClient();
 			await api.forgotPassword({ email });
 			success = true;
 		} catch (err) {

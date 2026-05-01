@@ -69,7 +69,6 @@ declare module '$env/static/private' {
 	export const SSH_AUTH_SOCK: string;
 	export const __CF_USER_TEXT_ENCODING: string;
 	export const npm_execpath: string;
-	export const npm_config_dir: string;
 	export const FZF_DEFAULT_OPTS: string;
 	export const npm_config_verify_deps_before_run: string;
 	export const npm_config_frozen_lockfile: string;
@@ -127,10 +126,10 @@ declare module '$env/static/private' {
 	export const __HM_SESS_VARS_SOURCED: string;
 	export const ATUIN_SHLVL: string;
 	export const npm_node_execpath: string;
-	export const npm_config_prefix: string;
 	export const OPENCODE: string;
 	export const COLORTERM: string;
 	export const __HM_ZSH_SESS_VARS_SOURCED: string;
+	export const npm_config_prefix: string;
 	export const TEST: string;
 	export const VITEST: string;
 	export const NODE_ENV: string;
@@ -256,7 +255,6 @@ declare module '$env/dynamic/private' {
 		SSH_AUTH_SOCK: string;
 		__CF_USER_TEXT_ENCODING: string;
 		npm_execpath: string;
-		npm_config_dir: string;
 		FZF_DEFAULT_OPTS: string;
 		npm_config_verify_deps_before_run: string;
 		npm_config_frozen_lockfile: string;
@@ -314,10 +312,10 @@ declare module '$env/dynamic/private' {
 		__HM_SESS_VARS_SOURCED: string;
 		ATUIN_SHLVL: string;
 		npm_node_execpath: string;
-		npm_config_prefix: string;
 		OPENCODE: string;
 		COLORTERM: string;
 		__HM_ZSH_SESS_VARS_SOURCED: string;
+		npm_config_prefix: string;
 		TEST: string;
 		VITEST: string;
 		NODE_ENV: string;

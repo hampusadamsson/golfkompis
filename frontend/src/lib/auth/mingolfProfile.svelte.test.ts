@@ -3,13 +3,13 @@ import { MinGolfProfileStore } from './mingolfProfile.svelte.js';
 import type { ApiClient } from '$lib/api/client';
 import type { Profile } from '$lib/api';
 
-const fakeProfile: Profile = {
+const fakeProfile = {
 	firstName: 'Anna',
 	lastName: 'Svensson',
 	email: 'anna@golf.se',
 	hcp: 12.0,
 	clubMemberships: [],
-};
+} as unknown as Profile;
 
 function makeApi(override: Partial<ApiClient> = {}): ApiClient {
 	return {

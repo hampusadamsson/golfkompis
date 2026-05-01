@@ -9,7 +9,7 @@
 	let { children } = $props();
 
 	$effect(() => {
-		const api = createApiClient({ cookieAuth: true });
+		const api = createApiClient();
 		api
 			.getMe()
 			.then((user) => {

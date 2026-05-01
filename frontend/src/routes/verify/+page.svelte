@@ -15,7 +15,7 @@
 			errorMessage = 'Ogiltig verifieringslänk.';
 			return;
 		}
-		const api = createApiClient({ cookieAuth: true });
+		const api = createApiClient();
 		api
 			.verifyEmail({ token })
 			.then((user) => {
