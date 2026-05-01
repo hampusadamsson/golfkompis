@@ -10,7 +10,6 @@ export function profile(req: Requester) {
 		 */
 		getProfile(opts?: { signal?: AbortSignal }): Promise<Profile> {
 			return req<Profile>('GET', '/api/v1/profile', {
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		}

@@ -11,7 +11,6 @@ export function friends(req: Requester) {
 		 */
 		getFriends(opts?: { signal?: AbortSignal }): Promise<FriendOverview> {
 			return req<FriendOverview>('GET', '/api/v1/friends', {
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		}

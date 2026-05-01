@@ -17,7 +17,6 @@ export function history(req: Requester) {
 		getHistory(params: HistoryParams = {}, opts?: { signal?: AbortSignal }): Promise<Booking[]> {
 			return req<Booking[]>('GET', '/api/v1/history', {
 				query: params,
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		}

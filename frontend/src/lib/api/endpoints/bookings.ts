@@ -32,7 +32,6 @@ export function bookings(req: Requester) {
 		findSlots(params: FindSlotsParams, opts?: { signal?: AbortSignal }): Promise<Slot[]> {
 			return req<Slot[]>('GET', '/api/v1/booking/find', {
 				query: params,
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		},
@@ -46,7 +45,6 @@ export function bookings(req: Requester) {
 		book(params: { slot_id: string }, opts?: { signal?: AbortSignal }): Promise<void> {
 			return req<void>('POST', '/api/v1/booking', {
 				body: params,
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		},
@@ -61,7 +59,6 @@ export function bookings(req: Requester) {
 		): Promise<Booking[]> {
 			return req<Booking[]>('GET', '/api/v1/bookings', {
 				query: params,
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		},
@@ -76,7 +73,6 @@ export function bookings(req: Requester) {
 		 */
 		cancelBooking(bookingId: string, opts?: { signal?: AbortSignal }): Promise<void> {
 			return req<void>('DELETE', `/api/v1/bookings/${encodeURIComponent(bookingId)}`, {
-				requireAuth: true,
 				signal: opts?.signal
 			});
 		}

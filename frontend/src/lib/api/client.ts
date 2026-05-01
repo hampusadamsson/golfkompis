@@ -7,11 +7,6 @@ import { profile } from './endpoints/profile.js';
 import { friends } from './endpoints/friends.js';
 import { users } from './endpoints/users.js';
 
-export interface ApiCredentials {
-	username: string;
-	password: string;
-}
-
 export interface ApiConfig {
 	/**
 	 * Base URL of the golfkompis API.
@@ -19,21 +14,11 @@ export interface ApiConfig {
 	 */
 	baseUrl?: string;
 	/**
-	 * MinGolf credentials. Required for authenticated endpoints.
-	 * The API validates credentials upstream on every request — no session is cached.
-	 */
-	credentials?: ApiCredentials;
-	/**
 	 * Custom fetch implementation. Pass `fetch` from a SvelteKit `load()` context
 	 * for SSR-compatible requests.
 	 * @default globalThis.fetch
 	 */
 	fetch?: typeof globalThis.fetch;
-	/**
-	 * If true, all requests include `credentials: 'include'` for cookie-based auth.
-	 * @default false
-	 */
-	cookieAuth?: boolean;
 }
 
 // Internal option shape passed from endpoint functions into request()
@@ -42,7 +27,6 @@ interface RequestOptions {
 	body?: unknown;
 	rawBody?: string;
 	contentType?: string;
-	requireAuth?: boolean;
 	signal?: AbortSignal;
 }
 
@@ -73,16 +57,7 @@ function createRequester(config: Required<ApiConfig>): Requester {
 		path: string,
 		opts: RequestOptions = {}
 	): Promise<T> {
-		const { query, body, requireAuth = false, signal } = opts;
-
-		// Auth check
-		if (requireAuth && (!config.credentials?.username || !config.credentials?.password)) {
-			throw new ApiError({
-				status: 401,
-				code: 'unauthorized',
-				message: 'No credentials configured. Pass credentials to createApiClient().'
-			});
-		}
+		const { query, body, signal } = opts;
 
 		// Build URL
 		const qs = query ? buildQuery(query) : '';
@@ -92,13 +67,7 @@ function createRequester(config: Required<ApiConfig>): Requester {
 		const headers: Record<string, string> = {
 			Accept: 'application/json'
 		};
-		if (requireAuth) {
-			headers['X-Mingolf-Username'] = config.credentials.username;
-			headers['X-Mingolf-Password'] = config.credentials.password;
-		}
 		if (opts.contentType) {
-			headers['Content-Type'] = opts.contentType;
-		} else if (opts.contentType) {
 			headers['Content-Type'] = opts.contentType;
 		} else if (body !== undefined) {
 			headers['Content-Type'] = 'application/json';
@@ -110,7 +79,7 @@ function createRequester(config: Required<ApiConfig>): Requester {
 				headers,
 				body: opts.rawBody ?? (body !== undefined ? JSON.stringify(body) : undefined),
 				signal,
-				credentials: config.cookieAuth ? 'include' : 'same-origin'
+				credentials: 'include'
 			});
 		} catch (err) {
 			throw ApiError.network(err);
@@ -159,21 +128,6 @@ export type ApiClient = MetaClient &
  * await api.health();
  * const courses = await api.searchCourses({ course: 'Botkyrka', only_18: true });
  *
- * // Authenticated
- * const api = createApiClient({
- *   baseUrl: 'http://localhost:8000',
- *   credentials: { username, password },
- * });
- * const profile = await api.getProfile();
- * const slots = await api.findSlots({
- *   date: '2025-07-24',
- *   courses: ['98369cac-d4bb-4671-931f-db10201ba1a5'],
- *   start: '07:30',
- *   stop: '12:00',
- *   spots: 4,
- * });
- * await api.book({ slot_id: slots[0].id });
- *
  * // SSR-friendly inside a SvelteKit load()
  * export const load = async ({ fetch }) => {
  *   const api = createApiClient({ fetch });
@@ -182,11 +136,9 @@ export type ApiClient = MetaClient &
  * ```
  */
 export function createApiClient(config: ApiConfig = {}): ApiClient {
-	const resolved: Required<ApiConfig> = {
+	const resolved = {
 		baseUrl: config.baseUrl ?? '',
-		credentials: config.credentials ?? { username: '', password: '' },
 		fetch: config.fetch ?? globalThis.fetch,
-		cookieAuth: config.cookieAuth ?? false
 	};
 
 	const req = createRequester(resolved);
