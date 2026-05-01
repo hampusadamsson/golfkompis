@@ -6,6 +6,7 @@ export type ApiErrorCode =
 	| 'validation' // 422
 	| 'upstream' // 502
 	| 'network' // fetch() threw (no response)
+	| 'mingolf_not_linked' // 412
 	| 'unknown'; // any other status
 
 function codeFromStatus(status: number): ApiErrorCode {
@@ -13,6 +14,7 @@ function codeFromStatus(status: number): ApiErrorCode {
 	if (status === 401) return 'unauthorized';
 	if (status === 404) return 'not_found';
 	if (status === 409) return 'conflict';
+	if (status === 412) return 'mingolf_not_linked';
 	if (status === 422) return 'validation';
 	if (status === 502) return 'upstream';
 	return 'unknown';
@@ -95,6 +97,8 @@ export function getErrorMessage(
 		network: 'Kunde inte nå servern. Kontrollera din anslutning.',
 		upstream: 'MinGolf är inte tillgängligt just nu. Försök igen senare.',
 		not_found: 'Hittades inte.',
+		mingolf_not_linked:
+			'MinGolf-konto är inte kopplat. Koppla det under Konto-sidan.',
 		conflict: 'Tiden bokades precis. Försök med en annan.',
 		bad_request: 'Ogiltig förfrågan.',
 		validation: 'Valideringsfel.',
