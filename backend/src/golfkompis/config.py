@@ -36,8 +36,8 @@ class Settings(BaseSettings):
     auth_database_url: str = "sqlite+aiosqlite:///./users.db"
     auth_cookie_lifetime_seconds: int = 3600
     auth_cookie_secure: bool = False
-    auth_frontend_verify_url: str = "http://localhost:8000/auth/verify"
-    auth_frontend_reset_url: str = "http://localhost:8000/auth/reset-password"
+    auth_frontend_verify_url: str = "http://localhost:5173/verify"
+    auth_frontend_reset_url: str = "http://localhost:5173/reset-password"
 
 
 settings = Settings()
