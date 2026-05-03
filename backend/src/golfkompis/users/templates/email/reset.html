@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Återställ ditt lösenord{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0a0a0a;letter-spacing:-0.02em;">Återställ ditt lösenord</h1>
+
+<p style="margin:0 0 16px;">Vi mottog en begäran om att återställa lösenordet för ditt Golfkompis-konto. Klicka på knappen nedan för att välja ett nytt lösenord.</p>
+
+<p style="margin:0 0 32px;">
+  <a href="{{ url }}" style="display:inline-block;background:#0a0a0a;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:15px;font-weight:600;">Återställ lösenord</a>
+</p>
+
+<p style="margin:0 0 6px;color:#737373;font-size:13px;">Om knappen inte fungerar, kopiera och klistra in denna länk i din webbläsare:</p>
+<p style="margin:0 0 24px;word-break:break-all;font-size:13px;"><a href="{{ url }}" style="color:#525252;">{{ url }}</a></p>
+
+<p style="margin:0;color:#737373;font-size:13px;">Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande. Ditt lösenord förblir oförändrat.</p>
+{% endblock %}

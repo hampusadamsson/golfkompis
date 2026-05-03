@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Golfkompis{% endblock %}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:24px;text-align:center;border-bottom:1px solid #e5e5e5;">
+              <strong style="font-size:20px;color:#0a0a0a;letter-spacing:-0.02em;">Golfkompis</strong>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding:32px 32px 24px;color:#262626;font-size:15px;line-height:1.6;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 32px;border-top:1px solid #e5e5e5;color:#737373;font-size:12px;text-align:center;line-height:1.5;">
+              Du får detta e-postmeddelande eftersom någon angav denna adress på Golfkompis.<br />
+              Om det inte var du kan du ignorera meddelandet.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Bekräfta din e-postadress{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0a0a0a;letter-spacing:-0.02em;">Bekräfta din e-postadress</h1>
+
+<p style="margin:0 0 24px;">Tack för att du registrerat dig på Golfkompis. Klicka på knappen nedan för att bekräfta din e-postadress och aktivera ditt konto.</p>
+
+<p style="margin:0 0 32px;">
+  <a href="{{ url }}" style="display:inline-block;background:#0a0a0a;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:15px;font-weight:600;">Bekräfta e-post</a>
+</p>
+
+<p style="margin:0 0 6px;color:#737373;font-size:13px;">Om knappen inte fungerar, kopiera och klistra in denna länk i din webbläsare:</p>
+<p style="margin:0;word-break:break-all;font-size:13px;"><a href="{{ url }}" style="color:#525252;">{{ url }}</a></p>
+{% endblock %}
