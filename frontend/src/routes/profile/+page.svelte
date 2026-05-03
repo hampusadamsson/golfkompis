@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { currentUser } from '$lib/auth/currentUser.svelte.js';
-	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte.js';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import Profile from '$lib/components/Profile.svelte';
 	import UpcomingBookings from '$lib/components/UpcomingBookings.svelte';
 	import History from '$lib/components/History.svelte';
 	import Friends from '$lib/components/Friends.svelte';
@@ -30,17 +30,9 @@
 		</Alert>
 	</div>
 {:else}
-	{#if mingolfProfile.profile}
-		<div class="container mx-auto max-w-2xl px-4 pt-6">
-			<div class="rounded-lg border p-4">
-				<p class="font-semibold">
-					{mingolfProfile.profile.firstName}
-					{mingolfProfile.profile.lastName}
-				</p>
-				<p class="text-muted-foreground text-sm">HCP {mingolfProfile.profile.hcp}</p>
-			</div>
-		</div>
-	{/if}
+	<div class="container mx-auto max-w-2xl px-4 pt-6">
+		<Profile />
+	</div>
 	<section class="mx-auto w-full max-w-2xl space-y-10 px-4 py-12">
 		<UpcomingBookings />
 		<History />

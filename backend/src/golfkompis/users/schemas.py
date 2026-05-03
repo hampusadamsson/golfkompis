@@ -9,7 +9,6 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     username: str | None = None
     full_name: str | None = None
     mingolf_username: str | None = None
-    mingolf_password: str | None = None
 
 
 class UserCreate(schemas.BaseUserCreate):

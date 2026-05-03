@@ -55,7 +55,7 @@ async def test_patch_mingolf_clear_both_null() -> None:
     mock_login.assert_not_called()
     data = r.json()
     assert data["mingolf_username"] is None
-    assert data["mingolf_password"] is None
+    assert "mingolf_password" not in data
 
 
 async def test_patch_mingolf_invalid_creds_rejected() -> None:
@@ -112,7 +112,7 @@ async def test_patch_mingolf_valid_creds_saved() -> None:
     assert r.status_code == 200
     data = r.json()
     assert data["mingolf_username"] == "123456-789"
-    assert data["mingolf_password"] == "mypass"
+    assert "mingolf_password" not in data
 
 
 async def test_patch_mingolf_unauthenticated() -> None:

@@ -13,8 +13,7 @@ describe('login page logic', () => {
 			is_verified: true,
 			username: 'alice',
 			full_name: 'Alice',
-			mingolf_username: null,
-			mingolf_password: null
+			mingolf_username: null
 		};
 		store.set(user);
 		expect(store.isLoggedIn).toBe(true);

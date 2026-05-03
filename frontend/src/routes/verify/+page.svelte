@@ -3,23 +3,25 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
 	import { createApiClient } from '$lib/api';
-	import { currentUser } from '$lib/auth/currentUser.svelte';
 
 	const token = $derived(page.url.searchParams.get('token') ?? '');
 
 	let success = $state(false);
 	let errorMessage = $state<string | null>(null);
 
+	let attempted = $state(false);
+
 	$effect(() => {
+		if (attempted) return;
 		if (!token) {
 			errorMessage = 'Ogiltig verifieringslänk.';
 			return;
 		}
+		attempted = true;
 		const api = createApiClient();
 		api
 			.verifyEmail({ token })
-			.then((user) => {
-				currentUser.set(user);
+			.then(() => {
 				success = true;
 			})
 			.catch(() => {
@@ -37,12 +39,12 @@
 
 	{#if success}
 		<Alert>
-			<AlertDescription>Din e-postadress är verifierad! Du är nu inloggad.</AlertDescription>
+			<AlertDescription>Din e-postadress är verifierad! Logga in för att fortsätta.</AlertDescription>
 		</Alert>
 		<div class="mt-4">
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<a href="/profile/account">
-				<Button>Gå till kontot</Button>
+			<a href="/login?verified=1">
+				<Button>Gå till inloggning</Button>
 			</a>
 		</div>
 	{:else if errorMessage}

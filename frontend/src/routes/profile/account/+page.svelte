@@ -17,24 +17,48 @@
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state(false);
+	let saveSuccessTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function showSaveSuccess() {
+		saveSuccess = true;
+		if (saveSuccessTimeout) clearTimeout(saveSuccessTimeout);
+		saveSuccessTimeout = setTimeout(() => {
+			saveSuccess = false;
+			saveSuccessTimeout = null;
+		}, 2500);
+	}
 
 	// --- MinGolf credentials ---
 	let mingolfUsername = $state('');
-	let mingolfPassword = $state('');
+	let mingolfPassword = $state(''); // never pre-filled from server
 	let mingolfShowPassword = $state(false);
 	let mingolfSaving = $state(false);
 	let mingolfError = $state<string | null>(null);
 	let mingolfSuccess = $state(false);
+	let mingolfSuccessTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function showMingolfSuccess() {
+		mingolfSuccess = true;
+		if (mingolfSuccessTimeout) clearTimeout(mingolfSuccessTimeout);
+		mingolfSuccessTimeout = setTimeout(() => {
+			mingolfSuccess = false;
+			mingolfSuccessTimeout = null;
+		}, 2500);
+	}
 
 	const mingolfUsernameValid = $derived(mingolfUsername === '' || isValidGolfId(mingolfUsername));
 
+	let _seededForUserId = $state<string | null>(null);
+
 	$effect(() => {
 		const u = currentUser.user;
-		if (u) {
+		// Only re-seed when the logged-in user changes, not on every PATCH response.
+		if (u && u.id !== _seededForUserId) {
+			_seededForUserId = u.id;
 			username = u.username ?? '';
 			fullName = u.full_name ?? '';
 			mingolfUsername = u.mingolf_username ?? '';
-			mingolfPassword = u.mingolf_password ?? '';
+			// mingolf_password is not returned by the server — never pre-fill
 		}
 	});
 
@@ -50,7 +74,7 @@
 				full_name: fullName || null
 			});
 		currentUser.set(updated);
-		saveSuccess = true;
+		showSaveSuccess();
 		} catch (err) {
 			saveError = getErrorMessage(err, {
 				conflict: 'Användarnamnet är redan taget.',
@@ -78,7 +102,7 @@
 			} else {
 				mingolfProfile.clear();
 			}
-			mingolfSuccess = true;
+			showMingolfSuccess();
 		} catch (err) {
 			mingolfError = getErrorMessage(err, {
 				unauthorized: 'Du är inte inloggad.'
@@ -190,11 +214,6 @@
 							<AlertDescription>{mingolfError}</AlertDescription>
 						</Alert>
 					{/if}
-					{#if mingolfSuccess}
-						<Alert>
-							<AlertDescription>MinGolf-uppgifter sparade.</AlertDescription>
-						</Alert>
-					{/if}
 
 					<div class="flex flex-col gap-1.5">
 						<Label for="mingolfUsername">Golf-ID</Label>
@@ -251,11 +270,6 @@
 					<AlertDescription>{saveError}</AlertDescription>
 				</Alert>
 			{/if}
-			{#if saveSuccess}
-				<Alert>
-					<AlertDescription>Dina uppgifter har sparats.</AlertDescription>
-				</Alert>
-			{/if}
 			<Button type="submit" form="profile-form" disabled={saving}>
 				{#if saving}Sparar…{:else}Spara ändringar{/if}
 			</Button>
@@ -274,3 +288,17 @@
 		</section>
 	{/if}
 </main>
+
+{#if saveSuccess || mingolfSuccess}
+	<div
+		class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 transform"
+		role="status"
+		aria-live="polite"
+	>
+		<Alert class="shadow-lg">
+			<AlertDescription>
+				{saveSuccess ? 'Dina uppgifter har sparats.' : 'MinGolf-uppgifter sparade.'}
+			</AlertDescription>
+		</Alert>
+	</div>
+{/if}

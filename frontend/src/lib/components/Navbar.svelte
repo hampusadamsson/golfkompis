@@ -13,17 +13,7 @@
 			await api.logout();
 		} finally {
 			currentUser.clear();
-		}
-	}
-
-	async function handleMingolfLogout() {
-		const api = createApiClient();
-		try {
-			const updated = await api.patchMyMingolf({ mingolf_username: null, mingolf_password: null });
-			currentUser.set(updated);
 			mingolfProfile.clear();
-		} catch {
-			// ignore errors — user can try again
 		}
 	}
 </script>
@@ -88,13 +78,5 @@
 			</a>
 		{/if}
 
-		<!-- MinGolf auth area -->
-		{#if mingolfProfile.profile}
-			<span class="hidden text-sm text-muted-foreground sm:inline">
-				{mingolfProfile.profile.firstName}
-				{mingolfProfile.profile.lastName} · HCP {mingolfProfile.profile.hcp}
-			</span>
-			<Button variant="outline" size="sm" onclick={handleMingolfLogout}>MinGolf ut</Button>
-		{/if}
 	</div>
 </header>

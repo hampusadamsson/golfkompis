@@ -11,8 +11,7 @@ describe('users endpoint', () => {
 			is_verified: false,
 			username: null,
 			full_name: null,
-			mingolf_username: null,
-			mingolf_password: null
+			mingolf_username: null
 		});
 		const client = users(req);
 		await client.register({
@@ -37,8 +36,7 @@ describe('users endpoint', () => {
 			is_verified: false,
 			username: null,
 			full_name: null,
-			mingolf_username: null,
-			mingolf_password: null
+			mingolf_username: null
 		});
 		const client = users(req);
 		await client.getMe();

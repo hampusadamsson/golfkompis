@@ -2,11 +2,19 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
-	import { createApiClient } from '$lib/api';
+	import { createApiClient, setGlobalOnUnauthorized } from '$lib/api';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte.js';
+	import { goto } from '$app/navigation';
 
 	let { children } = $props();
+
+	// Register global 401 interceptor — clears auth state and redirects to /login
+	setGlobalOnUnauthorized(() => {
+		currentUser.clear();
+		mingolfProfile.clear();
+		goto('/login');
+	});
 
 	$effect(() => {
 		const api = createApiClient();

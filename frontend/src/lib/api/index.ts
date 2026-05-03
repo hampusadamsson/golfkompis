@@ -4,7 +4,7 @@
 //   import { createApiClient, ApiError } from '$lib/api';
 //   import type { Slot, Booking, Profile, Course, Friend } from '$lib/api';
 
-export { createApiClient } from './client.js';
+export { createApiClient, setGlobalOnUnauthorized } from './client.js';
 export type { ApiClient, ApiConfig } from './client.js';
 
 export { ApiError, getErrorMessage } from './errors.js';

@@ -7,6 +7,20 @@ import { profile } from './endpoints/profile.js';
 import { friends } from './endpoints/friends.js';
 import { users } from './endpoints/users.js';
 
+// ── Global 401 interceptor ───────────────────────────────────────────────────
+// Register once from +layout.svelte to handle session expiry across the app.
+
+let _globalOnUnauthorized: (() => void) | undefined;
+
+/**
+ * Register a global handler called whenever any API request returns HTTP 401.
+ * Typically used to clear auth state and redirect to /login.
+ * Call once from root layout.
+ */
+export function setGlobalOnUnauthorized(handler: () => void): void {
+	_globalOnUnauthorized = handler;
+}
+
 export interface ApiConfig {
 	/**
 	 * Base URL of the golfkompis API.
@@ -19,6 +33,11 @@ export interface ApiConfig {
 	 * @default globalThis.fetch
 	 */
 	fetch?: typeof globalThis.fetch;
+	/**
+	 * Called when a request returns HTTP 401 (session expired / not authenticated).
+	 * Use this to clear auth state and redirect to /login.
+	 */
+	onUnauthorized?: () => void;
 }
 
 // Internal option shape passed from endpoint functions into request()
@@ -51,7 +70,7 @@ function buildQuery(params: object): string {
 	return str ? `?${str}` : '';
 }
 
-function createRequester(config: Required<ApiConfig>): Requester {
+function createRequester(config: Required<Pick<ApiConfig, 'baseUrl' | 'fetch'>> & Pick<ApiConfig, 'onUnauthorized'>): Requester {
 	return async function request<T>(
 		method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
 		path: string,
@@ -91,6 +110,11 @@ function createRequester(config: Required<ApiConfig>): Requester {
 		}
 		if (res.ok) {
 			return (await res.json()) as T;
+		}
+
+		// Global 401 hook — session expired or not authenticated
+		if (res.status === 401 && config.onUnauthorized) {
+			config.onUnauthorized();
 		}
 
 		// Error
@@ -139,6 +163,7 @@ export function createApiClient(config: ApiConfig = {}): ApiClient {
 	const resolved = {
 		baseUrl: config.baseUrl ?? '',
 		fetch: config.fetch ?? globalThis.fetch,
+		onUnauthorized: config.onUnauthorized ?? _globalOnUnauthorized,
 	};
 
 	const req = createRequester(resolved);

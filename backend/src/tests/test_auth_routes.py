@@ -129,7 +129,7 @@ async def test_patch_mingolf_creds(test_app: Any) -> None:
     assert r.status_code == 200
     data = r.json()
     assert data["mingolf_username"] == "123456-789"
-    assert data["mingolf_password"] == "mypass"
+    assert "mingolf_password" not in data
 
 
 @pytest.mark.asyncio

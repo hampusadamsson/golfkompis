@@ -42,8 +42,8 @@
 	</p>
 
 	<div class="flex flex-wrap justify-center gap-3">
-		<Button size="lg" href="/profile">Logga in</Button>
-		<Button size="lg" variant="outline" href="#features">Läs mer</Button>
+		<Button size="lg" href="/register">Registrera dig nu</Button>
+		<Button size="lg" variant="outline" href="/login">Logga in</Button>
 	</div>
 
 	<img
@@ -80,10 +80,13 @@
 
 <!-- CTA -->
 <section class="flex flex-col items-center gap-6 px-4 py-24 text-center">
-	<h2 class="max-w-xl text-3xl font-semibold tracking-tight">Redo att spela?</h2>
+	<h2 class="max-w-xl text-3xl font-semibold tracking-tight">Redo att ta din golf till nästa nivå?</h2>
 	<p class="max-w-md text-muted-foreground">
-		Logga in med ditt Golf-ID — vi använder dina vanliga Min Golf-uppgifter.
+		Skapa ett gratis konto och koppla ditt Min Golf — kom igång på under en minut.
 	</p>
-	<Button size="lg" href="/profile">Logga in</Button>
+	<div class="flex flex-wrap justify-center gap-3">
+		<Button size="lg" href="/register">Registrera dig nu</Button>
+		<Button size="lg" variant="ghost" href="/login">Har redan konto</Button>
+	</div>
 	<p class="text-xs text-muted-foreground">Golfkompis är inte anslutet till SGF eller Min Golf.</p>
 </section>

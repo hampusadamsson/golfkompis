@@ -117,7 +117,7 @@ class SessionCache:
         self._entries = {
             k: v for k, v in self._entries.items() if (now - v.created_at) < self._ttl
         }
-        if len(self._entries) >= self._max:
+        if self._entries and len(self._entries) >= self._max:
             oldest_key = min(self._entries, key=lambda k: self._entries[k].created_at)
             del self._entries[oldest_key]
 
@@ -827,23 +827,27 @@ async def patch_my_mingolf(
     user_db: Annotated[Any, Depends(get_user_db)],  # pyright: ignore[reportUnknownArgumentType]
 ) -> User:
     """Save (and verify) or clear the caller's MinGolf credentials."""
-    has_user = bool(body.mingolf_username)
-    has_pass = bool(body.mingolf_password)
+    # Normalize empty strings to None so we never persist empty-string creds.
+    mingolf_username = body.mingolf_username or None
+    mingolf_password = body.mingolf_password or None
+
+    has_user = bool(mingolf_username)
+    has_pass = bool(mingolf_password)
 
     if has_user != has_pass:
         raise HTTPException(status_code=422, detail="mingolf_incomplete")
 
     if has_user and has_pass:
         try:
-            MinGolf().login(body.mingolf_username, body.mingolf_password)  # type: ignore[arg-type]
+            MinGolf().login(mingolf_username, mingolf_password)  # type: ignore[arg-type]
         except InvalidCredentials as e:
             raise HTTPException(status_code=422, detail="mingolf_invalid") from e
 
     return await user_db.update(
         user,
         {  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
-            "mingolf_username": body.mingolf_username,
-            "mingolf_password": body.mingolf_password,
+            "mingolf_username": mingolf_username,
+            "mingolf_password": mingolf_password,
         },
     )
 

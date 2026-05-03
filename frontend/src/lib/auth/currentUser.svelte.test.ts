@@ -18,8 +18,7 @@ describe('CurrentUserStore', () => {
 			is_verified: true,
 			username: 'alice',
 			full_name: 'Alice',
-			mingolf_username: null,
-			mingolf_password: null
+			mingolf_username: null
 		};
 		store.set(user);
 		expect(store.user).toEqual(user);
@@ -36,8 +35,7 @@ describe('CurrentUserStore', () => {
 			is_verified: true,
 			username: null,
 			full_name: null,
-			mingolf_username: null,
-			mingolf_password: null
+			mingolf_username: null
 		});
 		store.clear();
 		expect(store.user).toBeNull();

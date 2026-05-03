@@ -9,7 +9,6 @@ export interface AppUser {
 	username: string | null;
 	full_name: string | null;
 	mingolf_username: string | null;
-	mingolf_password: string | null;
 }
 
 export interface UserCreate {
