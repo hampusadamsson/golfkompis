@@ -14,7 +14,7 @@ RUN pnpm run build
 # Stage 2: install backend dependencies
 FROM python:3.13-slim AS backend-builder
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.7.8 /uv /usr/local/bin/uv
 
 WORKDIR /app
 

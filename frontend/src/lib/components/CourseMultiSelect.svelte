@@ -24,6 +24,8 @@
 		only18?: boolean;
 		/** Max chips visible before "+N more" overflow. Default 5. */
 		maxVisibleChips?: number;
+		/** Max courses that can be selected simultaneously. Default 7. */
+		maxSelected?: number;
 		/** Toggle label for 18-hole filter. */
 		placeholder?: string;
 		apiBaseUrl?: string;
@@ -35,6 +37,7 @@
 		storageKey = STORAGE_KEY,
 		only18 = $bindable(false),
 		maxVisibleChips = 5,
+		maxSelected = 7,
 		placeholder = 'Sök banor…',
 		apiBaseUrl = ''
 	}: Props = $props();
@@ -78,7 +81,9 @@
 			if (raw) {
 				const parsed = JSON.parse(raw);
 				if (Array.isArray(parsed) && parsed.every((v) => typeof v === 'string')) {
-					selected = parsed;
+					const trimmed = parsed.slice(0, maxSelected);
+					selected = trimmed;
+					if (trimmed.length < parsed.length) persist(trimmed);
 				}
 			}
 		} catch {
@@ -93,6 +98,7 @@
 
 	// ── Derived helpers ───────────────────────────────────────────────────────
 	const selectedSet = $derived(new Set(selected));
+	const atCap = $derived(selected.length >= maxSelected);
 
 	const courseMap = $derived(new Map<string, Course>(allCourses.map((c) => [c.CourseID, c])));
 
@@ -155,6 +161,7 @@
 		if (selectedSet.has(courseId)) {
 			selected = selected.filter((id) => id !== courseId);
 		} else {
+			if (selected.length >= maxSelected) return;
 			selected = [...selected, courseId];
 		}
 		persist(selected);
@@ -176,7 +183,7 @@
 <div class="relative w-full" bind:this={containerEl}>
 	<!-- Selected chips -->
 	{#if selectedCourses.length > 0}
-		<div class="mb-2 flex flex-wrap gap-1.5">
+		<div class="mb-2 flex flex-wrap items-center gap-1.5">
 			{#each visibleChips as course (course.CourseID)}
 				<Badge variant="secondary" class="flex items-center gap-1 pr-1">
 					<span class="max-w-[180px] truncate text-xs">{label(course)}</span>
@@ -207,6 +214,11 @@
 					visa färre
 				</button>
 			{/if}
+			<span
+				class="ml-auto text-xs {atCap ? 'font-medium text-destructive' : 'text-muted-foreground'}"
+			>
+				{selected.length} / {maxSelected}
+			</span>
 		</div>
 	{/if}
 
@@ -268,15 +280,23 @@
 			{:else if displayed.length === 0}
 				<div class="px-3 py-6 text-center text-sm text-muted-foreground">Inga banor hittades.</div>
 			{:else}
+				{#if atCap}
+					<div class="border-b px-3 py-2 text-center text-xs text-muted-foreground">
+						Max {maxSelected} banor valda. Avmarkera en för att välja en annan.
+					</div>
+				{/if}
 				{#each displayed as course (course.CourseID)}
 					{@const isSelected = selectedSet.has(course.CourseID)}
+					{@const disabled = !isSelected && atCap}
 					<button
 						type="button"
 						role="option"
 						aria-selected={isSelected}
-						class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent {isSelected
-							? 'bg-accent/50'
-							: ''}"
+						aria-disabled={disabled}
+						{disabled}
+						class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm {disabled
+							? 'cursor-not-allowed opacity-40'
+							: 'hover:bg-accent'} {isSelected ? 'bg-accent/50' : ''}"
 						onclick={() => toggle(course.CourseID)}
 					>
 						<span class="flex h-4 w-4 shrink-0 items-center justify-center">

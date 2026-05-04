@@ -6,18 +6,27 @@
 	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte.js';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
-	// Register global 401 interceptor — clears auth state and redirects to /login
+	// Routes accessible without being logged in — 401s here are expected.
+	const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify'];
+
+	// Global 401 interceptor — clears auth state and redirects to /login,
+	// but is a no-op on public routes where unauthenticated access is expected.
 	setGlobalOnUnauthorized(() => {
+		const path = page.url.pathname;
+		if (PUBLIC_ROUTES.some((p) => path === p || path.startsWith(`${p}/`))) return;
 		currentUser.clear();
 		mingolfProfile.clear();
 		goto('/login');
 	});
 
 	$effect(() => {
-		const api = createApiClient();
+		// Bootstrap probe — a 401 here just means "not logged in", not an error.
+		// Use a per-call no-op to prevent the global handler from bouncing the user.
+		const api = createApiClient({ onUnauthorized: () => {} });
 		api
 			.getMe()
 			.then((user) => {
