@@ -6,7 +6,7 @@ description = "A system to manage golf bookings"
 requires-python = "==3.13.*"
 dependencies = [
   "fastapi>=0.136.1",
-  "fastapi-users[sqlalchemy]>=14.0.0",
+  "fastapi-users[sqlalchemy]>=15.0.5",
   "aiosqlite>=0.20.0",
   "pydantic>=2.13.3",
   "pydantic-settings>=2.6.0",
