@@ -224,7 +224,7 @@
 							</div>
 							<div class="flex flex-col gap-1.5">
 								<Label for="eq-stop-{entry.id}">
-									<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
+									<span class="block text-xs leading-none text-muted-foreground">Sluttid</span>
 									<span>Senast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
 								</Label>
 								<input
