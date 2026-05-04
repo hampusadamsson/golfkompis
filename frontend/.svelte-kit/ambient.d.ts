@@ -65,7 +65,6 @@ declare module '$env/static/private' {
 	export const PNPM_SCRIPT_SRC_DIR: string;
 	export const SSH_AUTH_SOCK: string;
 	export const __CF_USER_TEXT_ENCODING: string;
-	export const npm_config_dir: string;
 	export const npm_execpath: string;
 	export const FZF_DEFAULT_OPTS: string;
 	export const npm_config_frozen_lockfile: string;
@@ -122,7 +121,6 @@ declare module '$env/static/private' {
 	export const __HM_ZSH_SESS_VARS_SOURCED: string;
 	export const COLORTERM: string;
 	export const OPENCODE: string;
-	export const npm_config_prefix: string;
 	export const npm_node_execpath: string;
 }
 
@@ -237,7 +235,6 @@ declare module '$env/dynamic/private' {
 		PNPM_SCRIPT_SRC_DIR: string;
 		SSH_AUTH_SOCK: string;
 		__CF_USER_TEXT_ENCODING: string;
-		npm_config_dir: string;
 		npm_execpath: string;
 		FZF_DEFAULT_OPTS: string;
 		npm_config_frozen_lockfile: string;
@@ -294,7 +291,6 @@ declare module '$env/dynamic/private' {
 		__HM_ZSH_SESS_VARS_SOURCED: string;
 		COLORTERM: string;
 		OPENCODE: string;
-		npm_config_prefix: string;
 		npm_node_execpath: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
