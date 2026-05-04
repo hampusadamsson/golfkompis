@@ -176,3 +176,41 @@ export interface ValidationErrorDetail {
 export interface HTTPValidationError {
 	detail: ValidationErrorDetail[];
 }
+
+// ── Queue ─────────────────────────────────────────────────────────────────
+
+export type QueueStatus = 'active' | 'matched' | 'expired' | 'cancelled';
+
+export interface QueueEntry {
+	id: string;
+	target_date: string;
+	start_time: string | null;
+	stop_time: string | null;
+	min_spots: number;
+	course_ids: string[];
+	status: QueueStatus;
+	created_at: string;
+	last_checked_at: string | null;
+	check_count: number;
+	resolved_at: string | null;
+	matched_slots: Slot[] | null;
+}
+
+export interface QueueEntryCreate {
+	target_date: string;
+	start_time?: string;
+	stop_time?: string;
+	min_spots?: number;
+	course_ids: string[];
+}
+
+export interface QueueEntryUpdate {
+	start_time?: string | null;
+	stop_time?: string | null;
+	min_spots?: number;
+	course_ids?: string[];
+}
+
+export interface ListQueueParams {
+	status?: QueueStatus;
+}

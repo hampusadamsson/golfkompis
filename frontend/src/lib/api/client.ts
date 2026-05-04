@@ -6,6 +6,7 @@ import { history } from './endpoints/history.js';
 import { profile } from './endpoints/profile.js';
 import { friends } from './endpoints/friends.js';
 import { users } from './endpoints/users.js';
+import { queue } from './endpoints/queue.js';
 
 // ── Global 401 interceptor ───────────────────────────────────────────────────
 // Register once from +layout.svelte to handle session expiry across the app.
@@ -131,6 +132,7 @@ type HistoryClient = ReturnType<typeof history>;
 type ProfileClient = ReturnType<typeof profile>;
 type FriendsClient = ReturnType<typeof friends>;
 type UsersClient = ReturnType<typeof users>;
+type QueueClient = ReturnType<typeof queue>;
 
 export type ApiClient = MetaClient &
 	CoursesClient &
@@ -138,7 +140,8 @@ export type ApiClient = MetaClient &
 	HistoryClient &
 	ProfileClient &
 	FriendsClient &
-	UsersClient;
+	UsersClient &
+	QueueClient;
 
 // ── Factory ─────────────────────────────────────────────────────────────────
 
@@ -175,6 +178,7 @@ export function createApiClient(config: ApiConfig = {}): ApiClient {
 		...history(req),
 		...profile(req),
 		...friends(req),
-		...users(req)
+		...users(req),
+		...queue(req)
 	};
 }

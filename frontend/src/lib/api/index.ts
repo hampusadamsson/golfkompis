@@ -32,3 +32,4 @@ export type {
 export type { FindSlotsParams, ListBookingsParams } from './endpoints/bookings.js';
 export type { SearchCoursesParams, ListCoursesParams } from './endpoints/courses.js';
 export type { HistoryParams } from './endpoints/history.js';
+export type { QueueEntry, QueueStatus, QueueEntryCreate, QueueEntryUpdate, ListQueueParams } from './endpoints/queue.js';
