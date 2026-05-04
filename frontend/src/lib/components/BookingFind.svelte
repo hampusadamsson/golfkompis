@@ -237,7 +237,7 @@
 			<Button
 				onclick={search}
 				disabled={loading || courseIds.length === 0}
-				class="sm:w-auto"
+				class="w-full sm:w-auto"
 			>
 				{#if loading}
 					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" />
@@ -252,7 +252,7 @@
 				variant="outline"
 				onclick={enqueue}
 				disabled={enqueuing || courseIds.length === 0}
-				class="sm:w-auto"
+				class="w-full sm:w-auto"
 			>
 				{#if enqueuing}
 					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" />
