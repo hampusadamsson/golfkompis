@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Tabs, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
@@ -64,12 +63,8 @@
 		}
 	}
 
-	onMount(() => {
-		void load();
-	});
-
 	$effect(() => {
-		// Re-run when activeTab changes (after mount)
+		// Fires on mount and whenever activeTab changes
 		activeTab;
 		void load();
 	});
