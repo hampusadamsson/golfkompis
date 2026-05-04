@@ -1,5 +1,6 @@
 """FastAPI app for golfkompis - tee time search."""
 
+import asyncio
 import hashlib
 import threading
 import time as _time
@@ -153,6 +154,7 @@ class AppState:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    import golfkompis.queue.models  # noqa: F401  # pyright: ignore[reportUnusedImport]
     from golfkompis.users.db import create_db_and_tables
 
     configure_logging(json_output=True)
@@ -175,7 +177,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         app.dependency_overrides[get_authenticated_client] = lambda: fake
         log.info("mock mode enabled — returning fixture data, auth bypassed")  # pyright: ignore[reportAny]
 
+    worker_task: asyncio.Task[None] | None = None
+    stop_event = asyncio.Event()
+    if settings.queue_enabled:
+        from golfkompis.queue.worker import run_queue_worker
+
+        worker_task = asyncio.create_task(run_queue_worker(stop_event))
+
     yield
+
+    if worker_task is not None:
+        stop_event.set()
+        worker_task.cancel()
+        import contextlib
+
+        with contextlib.suppress(asyncio.CancelledError):
+            await worker_task
+
     state.session_cache.close_all()
 
 
@@ -198,6 +216,7 @@ app = FastAPI(
 # User management (fastapi-users) — additive, separate from MinGolf auth
 # ---------------------------------------------------------------------------
 
+from golfkompis.queue.routes import router as queue_router  # noqa: E402
 from golfkompis.users.db import (  # noqa: E402
     get_user_db,  # pyright: ignore[reportUnknownVariableType]
 )
@@ -234,6 +253,7 @@ app.include_router(
     prefix="/users",
     tags=["users"],
 )
+app.include_router(queue_router, prefix="/api/v1/queue", tags=["queue"])
 
 
 # ---------------------------------------------------------------------------
