@@ -1,42 +1,23 @@
-# sv
+# Frontend — Golfkompis
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit 2 · Svelte 5 runes · Tailwind v4 · pnpm
 
-## Creating a project
+For setup, configuration, Docker build, deploy, and email see the [root README](../README.md).
 
-If you're seeing this, you've probably already done this step. Congrats!
+---
 
-```sh
-# create a new project
-npx sv create my-app
+## Dev commands
+
+```bash
+pnpm install      # install dependencies
+pnpm dev          # dev server → http://localhost:5173
+pnpm check        # svelte-check (type check)
+pnpm lint         # prettier + eslint
+pnpm format       # prettier write
+pnpm test         # vitest
+pnpm build        # production build (output: build/)
 ```
 
-To recreate this project with the same configuration:
+`DATABASE_URL` must be set (e.g. `DATABASE_URL=local.db`) — copy `../.env.example` to `../.env`.
 
-```sh
-# recreate this project
-pnpm dlx sv@0.15.1 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" tailwindcss="plugins:none" sveltekit-adapter="adapter:static" drizzle="database:sqlite+sqlite:better-sqlite3" mdsvex --install pnpm golfkompis-ui
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+See `AGENTS.md` in this directory for stack conventions, component patterns, and Drizzle DB commands.
