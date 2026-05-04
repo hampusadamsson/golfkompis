@@ -4,6 +4,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import ClockIcon from '@lucide/svelte/icons/clock';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
@@ -17,9 +18,10 @@
 	interface Props {
 		apiBaseUrl?: string;
 		onBooked?: (slot: Slot) => void;
+		onEnqueued?: () => void;
 	}
 
-	let { apiBaseUrl = '', onBooked }: Props = $props();
+	let { apiBaseUrl = '', onBooked, onEnqueued }: Props = $props();
 
 	type SlotWithCourse = Slot & { course: Course };
 
@@ -40,6 +42,9 @@
 	let loading = $state(false);
 	let searched = $state(false);
 	let results = $state<CourseResult[]>([]);
+
+	let enqueuing = $state(false);
+	let enqueueAlert = $state<{ kind: 'success' | 'error'; msg: string } | null>(null);
 
 	let bookTarget = $state<SlotWithCourse | null>(null);
 
@@ -126,6 +131,40 @@
 		onBooked?.(slot);
 		await search();
 	}
+
+	async function enqueue() {
+		if (courseIds.length === 0) return;
+		enqueuing = true;
+		enqueueAlert = null;
+		try {
+			const api = createApiClient({ baseUrl: apiBaseUrl });
+			await api.createQueueEntry({
+				target_date: date,
+				start_time: start || undefined,
+				stop_time: stop || undefined,
+				min_spots: spots,
+				course_ids: courseIds
+			});
+			enqueueAlert = { kind: 'success', msg: 'Sökningen är tillagd i kön.' };
+			onEnqueued?.();
+		} catch (err) {
+			const msg = getErrorMessage(err, {
+				mingolf_not_linked: 'Koppla ditt MinGolf-konto för att använda kö.',
+				not_found: 'En eller flera banor kunde inte hittas.',
+				validation: 'Ogiltigt datum eller tid.',
+				default: 'Kunde inte lägga till i kön.'
+			});
+			enqueueAlert = { kind: 'error', msg };
+		} finally {
+			enqueuing = false;
+		}
+	}
+
+	$effect(() => {
+		if (!enqueueAlert) return;
+		const t = setTimeout(() => (enqueueAlert = null), 5000);
+		return () => clearTimeout(t);
+	});
 </script>
 
 <section class="rounded-xl border p-4">
@@ -194,10 +233,11 @@
 				</div>
 			</div>
 
+		<div class="flex flex-wrap items-center gap-2">
 			<Button
 				onclick={search}
 				disabled={loading || courseIds.length === 0}
-				class="w-full sm:w-auto"
+				class="sm:w-auto"
 			>
 				{#if loading}
 					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" />
@@ -207,7 +247,34 @@
 					Sök
 				{/if}
 			</Button>
+
+			<Button
+				variant="outline"
+				onclick={enqueue}
+				disabled={enqueuing || courseIds.length === 0}
+				class="sm:w-auto"
+			>
+				{#if enqueuing}
+					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" />
+					Lägger till…
+				{:else}
+					<ClockIcon class="mr-2 h-4 w-4" />
+					Ställ mig i kö
+				{/if}
+			</Button>
 		</div>
+		</div>
+
+		{#if enqueueAlert}
+			<div
+				class="rounded-md border px-4 py-3 text-sm {enqueueAlert.kind === 'success'
+					? 'border-green-200 bg-green-50 text-green-800'
+					: 'border-destructive/30 bg-destructive/10 text-destructive'}"
+				role="alert"
+			>
+				{enqueueAlert.msg}
+			</div>
+		{/if}
 
 		<!-- Results -->
 		<div class="mt-6">
