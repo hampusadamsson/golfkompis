@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Lediga tider hittades{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0a0a0a;letter-spacing:-0.02em;">Lediga tider hittades!</h1>
+
+<p style="margin:0 0 24px;">Vi hittade lediga starttider för <strong>{{ target_date }}</strong> som matchar din bevakning.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:0 0 24px;">
+  <thead>
+    <tr style="border-bottom:2px solid #e5e5e5;">
+      <th style="text-align:left;padding:8px 4px;font-size:13px;color:#737373;font-weight:600;">Tid</th>
+      <th style="text-align:left;padding:8px 4px;font-size:13px;color:#737373;font-weight:600;">Lediga platser</th>
+      <th style="text-align:left;padding:8px 4px;font-size:13px;color:#737373;font-weight:600;">Greenfee</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for slot in slots %}
+    <tr style="border-bottom:1px solid #f5f5f5;">
+      <td style="padding:10px 4px;font-size:14px;">{{ slot.time }}</td>
+      <td style="padding:10px 4px;font-size:14px;">{{ slot.available_spots }}</td>
+      <td style="padding:10px 4px;font-size:14px;">{% if slot.price is not none %}{{ slot.price }} kr{% else %}—{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if more_count > 0 %}
+<p style="margin:0 0 24px;color:#737373;font-size:13px;">+ {{ more_count }} ytterligare tider tillgängliga.</p>
+{% endif %}
+
+<p style="margin:0;color:#737373;font-size:13px;">Logga in på Golfkompis för att se alla tider och boka.</p>
+{% endblock %}

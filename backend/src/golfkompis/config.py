@@ -1,5 +1,7 @@
 """Centralized configuration loaded from environment / .env."""
 
+from datetime import time
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -38,6 +40,15 @@ class Settings(BaseSettings):
     auth_cookie_secure: bool = False
     auth_frontend_verify_url: str = "http://localhost:5173/verify"
     auth_frontend_reset_url: str = "http://localhost:5173/reset-password"
+
+    # ---------------------------------------------------------------------------
+    # Tee-time search queue
+    # ---------------------------------------------------------------------------
+    queue_enabled: bool = True
+    queue_poll_interval_minutes: int = 60
+    queue_active_window_start: time = time(8, 0)
+    queue_active_window_stop: time = time(22, 0)
+    queue_email_max_slots: int = 20
 
 
 settings = Settings()

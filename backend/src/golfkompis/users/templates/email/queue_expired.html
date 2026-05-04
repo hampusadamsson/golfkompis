@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Inga lediga tider hittades{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0a0a0a;letter-spacing:-0.02em;">Inga lediga tider hittades</h1>
+
+<p style="margin:0 0 16px;">Tyvärr hittade vi inga lediga starttider för <strong>{{ target_date }}</strong> som matchade din bevakning.</p>
+
+{% if start_time or stop_time %}
+<p style="margin:0 0 24px;color:#737373;font-size:14px;">
+  Sökt tidsintervall:
+  {% if start_time %}från {{ start_time }}{% endif %}
+  {% if stop_time %}till {{ stop_time }}{% endif %}
+  — minst {{ min_spots }} plats{% if min_spots > 1 %}er{% endif %}.
+</p>
+{% else %}
+<p style="margin:0 0 24px;color:#737373;font-size:14px;">Sökt med minst {{ min_spots }} ledig plats{% if min_spots > 1 %}er{% endif %}.</p>
+{% endif %}
+
+<p style="margin:0;color:#737373;font-size:13px;">Din bevakning är nu avslutad. Du kan skapa en ny bevakning på Golfkompis om du vill fortsätta söka.</p>
+{% endblock %}

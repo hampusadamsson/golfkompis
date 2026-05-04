@@ -29,6 +29,7 @@ _mail_config = ConnectionConfig(
 )
 
 _fm = FastMail(_mail_config)
+mail_client = _fm  # public alias for use by other modules
 
 
 async def send_verification_email(email: str, token: str) -> None:
