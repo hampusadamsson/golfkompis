@@ -1,11 +1,32 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
+	import {
+		Sheet,
+		SheetContent,
+		SheetTrigger,
+		SheetClose
+	} from '$lib/components/ui/sheet';
 	import { createApiClient } from '$lib/api';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte';
+	import MenuIcon from '@lucide/svelte/icons/menu';
 
-	let loginOpen = $state(false);
+	type NavLink = { href: string; label: string; isActive: (p: string) => boolean };
+
+	const navLinks: NavLink[] = [
+		{ href: '/', label: 'Hem', isActive: (p) => p === '/' },
+		{ href: '/profile', label: 'Min sida', isActive: (p) => p === '/profile' },
+		{ href: '/book', label: 'Boka', isActive: (p) => p === '/book' }
+	];
+
+	function linkClass(active: boolean) {
+		return active
+			? 'font-medium text-foreground'
+			: 'text-muted-foreground transition-colors hover:text-foreground';
+	}
+
+	let mobileOpen = $state(false);
 
 	async function handleAppLogout() {
 		const api = createApiClient();
@@ -18,65 +39,105 @@
 	}
 </script>
 
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <header class="sticky top-0 z-40 border-b bg-background">
 	<div class="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4">
 		<!-- Brand -->
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href="/" class="text-lg font-bold tracking-tight">Golfkompis</a>
 
-		<!-- Nav links -->
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
-		<nav class="flex items-center gap-4 text-sm">
-			<a
-				href="/"
-				class={page.url.pathname === '/'
-					? 'font-medium text-foreground'
-					: 'text-muted-foreground transition-colors hover:text-foreground'}
-			>
-				Hem
-			</a>
-			<a
-				href="/profile"
-				class={page.url.pathname === '/profile'
-					? 'font-medium whitespace-nowrap text-foreground'
-					: 'whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground'}
-			>
-				Min sida
-			</a>
-			<a
-				href="/book"
-				class={page.url.pathname === '/book'
-					? 'font-medium text-foreground'
-					: 'text-muted-foreground transition-colors hover:text-foreground'}
-			>
-				Boka
-			</a>
-			<a
-				href={currentUser.isLoggedIn ? '/profile/account' : '/login'}
-				class={page.url.pathname.startsWith('/profile/account') ||
-				(page.url.pathname as string) === '/login'
-					? 'font-medium text-foreground'
-					: 'text-muted-foreground transition-colors hover:text-foreground'}
-			>
-				Konto
-			</a>
+		<!-- Desktop nav links + auth -->
+		<nav class="hidden items-center gap-4 text-sm md:flex" aria-label="Huvudnavigation">
+			{#each navLinks as link (link.href)}
+				<a
+					href={link.href}
+					class={linkClass(link.isActive(page.url.pathname))}
+					aria-current={link.isActive(page.url.pathname) ? 'page' : undefined}
+				>
+					{link.label}
+				</a>
+			{/each}
+			{#if currentUser.isLoggedIn}
+				<button class={linkClass(false)} onclick={handleAppLogout}>Logga ut</button>
+			{:else}
+				<a href="/login" class={linkClass(page.url.pathname === '/login')}>Logga in</a>
+			{/if}
 		</nav>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 		<div class="flex-1"></div>
 
-		<!-- App auth area -->
 		{#if currentUser.isLoggedIn}
-			<span class="hidden text-sm text-muted-foreground sm:inline">
+			<a
+				href="/profile/account"
+				class="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline"
+			>
 				{currentUser.user?.username ?? currentUser.user?.email}
-			</span>
-			<Button variant="ghost" size="sm" onclick={handleAppLogout}>Logga ut konto</Button>
-		{:else}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<a href="/login">
-				<Button variant="ghost" size="sm">Logga in konto</Button>
 			</a>
 		{/if}
 
+		<!-- Mobile hamburger -->
+		<Sheet bind:open={mobileOpen}>
+			<SheetTrigger>
+				<Button
+					variant="ghost"
+					size="icon"
+					aria-label="Öppna meny"
+					class="md:hidden"
+					onclick={() => (mobileOpen = true)}
+				>
+					<MenuIcon class="h-5 w-5" />
+				</Button>
+			</SheetTrigger>
+			<SheetContent side="right" class="w-64 pt-10">
+				<nav class="flex flex-col gap-1" aria-label="Mobilnavigation">
+					{#each navLinks as link (link.href)}
+						<SheetClose>
+							<a
+								href={link.href}
+								onclick={() => (mobileOpen = false)}
+								class="flex w-full rounded-md px-3 py-2 text-base font-medium {link.isActive(
+									page.url.pathname
+								)
+									? 'bg-muted text-foreground'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground'} transition-colors"
+								aria-current={link.isActive(page.url.pathname) ? 'page' : undefined}
+							>
+								{link.label}
+							</a>
+						</SheetClose>
+					{/each}
+					<div class="my-1 border-t"></div>
+					{#if currentUser.isLoggedIn}
+						<SheetClose>
+							<a
+								href="/profile/account"
+								onclick={() => (mobileOpen = false)}
+								class="flex w-full rounded-md px-3 py-2 text-base font-medium {page.url.pathname.startsWith('/profile/account') ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'} transition-colors"
+							>
+								{currentUser.user?.username ?? currentUser.user?.email}
+							</a>
+						</SheetClose>
+						<SheetClose>
+							<button
+								onclick={() => { mobileOpen = false; handleAppLogout(); }}
+								class="flex w-full rounded-md px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							>
+								Logga ut
+							</button>
+						</SheetClose>
+					{:else}
+						<SheetClose>
+							<a
+								href="/login"
+								onclick={() => (mobileOpen = false)}
+								class="flex w-full rounded-md px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							>
+								Logga in
+							</a>
+						</SheetClose>
+					{/if}
+				</nav>
+			</SheetContent>
+		</Sheet>
 	</div>
 </header>
+<!-- eslint-enable svelte/no-navigation-without-resolve -->

@@ -53,6 +53,16 @@ export function formatDateLong(iso: string): string {
  * Falls back to full Intl formatting for unrecognised formats.
  */
 export function formatSlotTime(slotTime: string): string {
+	// TZ-aware instant (Z or ±HH:MM offset) → convert to Stockholm wall clock.
+	if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(slotTime)) {
+		try {
+			return timeFmt.format(new Date(slotTime));
+		} catch {
+			return slotTime;
+		}
+	}
+	// Naive ISO ("2025-04-28T08:30:00") or bare "HH:MM" — treat as Stockholm
+	// clock time already; extract HH:MM directly to avoid browser-TZ skew.
 	const m = /T?(\d{2}:\d{2})/.exec(slotTime);
 	if (m?.[1]) return m[1];
 	try {

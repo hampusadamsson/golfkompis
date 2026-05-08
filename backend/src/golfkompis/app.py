@@ -475,7 +475,8 @@ def find(
     """Search available tee slots across one or more courses.
 
     Results are filtered to the requested time window and minimum party size.
-    Slot times are returned in Europe/Stockholm local time.
+    Slot times are returned as UTC ISO 8601 strings (e.g. "2026-04-21T06:00:00Z").
+    Clients should convert to Europe/Stockholm for display.
 
     Parameters
     ----------

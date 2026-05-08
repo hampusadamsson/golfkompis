@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
 # Course / Club (used for local course lookup from courses.json)
@@ -41,7 +41,14 @@ class SlotPrice(BaseModel):
 
 class Slot(BaseModel):
     id: str
-    time: str  # ISO datetime e.g. "2026-04-21T06:00:00"
+    time: str = Field(
+        ...,
+        description=(
+            "ISO 8601 timestamp in UTC (Z suffix). "
+            "Clients should convert to Europe/Stockholm for display."
+        ),
+        examples=["2026-04-21T06:00:00Z"],
+    )
     price: SlotPrice
     flexColor: str
     nineHoleBookingAavailable: bool  # typo matches API spec
