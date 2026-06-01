@@ -5,15 +5,15 @@ description = "A system to manage golf bookings"
 
 requires-python = "==3.13.*"
 dependencies = [
-  "fastapi>=0.136.1",
+  "fastapi>=0.136.3",
   "fastapi-users[sqlalchemy]>=14.0.0",
   "aiosqlite>=0.20.0",
-  "pydantic>=2.13.3",
-  "pydantic-settings>=2.6.0",
-  "requests>=2.33.1",
+  "pydantic>=2.13.4",
+  "pydantic-settings>=2.14.1",
+  "requests>=2.34.2",
   "structlog>=25.5.0",
-  "uvicorn>=0.46.0",
-  "fastapi-mail>=1.6.3",
+  "uvicorn>=0.48.0",
+  "fastapi-mail>=1.6.4",
 ]
 
 [project.scripts]
@@ -21,11 +21,11 @@ golfkompis = "golfkompis.__main__:main"
 
 [dependency-groups]
 dev = [
-  "basedpyright>=1.39.3",
+  "basedpyright>=1.39.6",
   "pre-commit>=4.0.0",
-  "ruff>=0.15.12",
+  "ruff>=0.15.15",
   "pytest>=9.0.3",
-  "pytest-asyncio>=0.24.0",
+  "pytest-asyncio>=1.4.0",
   "httpx>=0.28.1",
   "asgi-lifespan>=2.1.0",
 ]
