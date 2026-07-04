@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.1.0](https://github.com/hampusadamsson/golfkompis/compare/golfkompis-backend-v1.0.1...golfkompis-backend-v1.1.0) (2026-07-04)
+
+
+### Features
+
+* add mingolf credentials to user account, remove age ([fb11b34](https://github.com/hampusadamsson/golfkompis/commit/fb11b34e7cf8ca6ede55743e277902d09abc51a4))
+* backend MinGolf endpoints use session cookie + DB creds ([410269d](https://github.com/hampusadamsson/golfkompis/commit/410269dc7c158d2719f25f5f9f81c8094828f9ae))
+* html email templates via jinja2 for verification and reset flows ([b23ecc9](https://github.com/hampusadamsson/golfkompis/commit/b23ecc97222ca2eb38bd8f71508702e83fd80da5))
+* **queue:** add CRUD routes, async worker, and wire into lifespan ([9a0d2f4](https://github.com/hampusadamsson/golfkompis/commit/9a0d2f415d8171dd616c91ccf90db23bc1fc97d9))
+* **queue:** add queue settings, models, schemas, and email senders ([fb89eb1](https://github.com/hampusadamsson/golfkompis/commit/fb89eb1da2f0410c2961988731d706ead5c3afe7))
+* verify MinGolf creds before persisting on /users/me/mingolf ([7d7b5d9](https://github.com/hampusadamsson/golfkompis/commit/7d7b5d9fa26e55915a38059cde766e8920ff5e32))
+
+
+### Bug Fixes
+
+* I3/I4/I17/M10 — sequence guard, verify re-run, global 401 interceptor ([6332da6](https://github.com/hampusadamsson/golfkompis/commit/6332da6fe4478b5044a2369402c436f733a430fc))
+* make user.username column nullable to match optional schema ([eb65761](https://github.com/hampusadamsson/golfkompis/commit/eb65761315fc1ce1eb8cff5e6bfe2715128a3fcf))
+* make username optional in UserCreate and UserRead schemas ([0780179](https://github.com/hampusadamsson/golfkompis/commit/078017989d400f5684af7aa7f143c9cd239bc038))
+* point auth email URL defaults at frontend routes, not backend endpoints ([1b84a1f](https://github.com/hampusadamsson/golfkompis/commit/1b84a1f6323adf1eb27f527b08af2b0130dd324f))
+* test backend OK now ([5217323](https://github.com/hampusadamsson/golfkompis/commit/52173233702155850c64219bf5b47c1e4b4d9e8c))
+
+
+### Documentation
+
+* add root README with build/deploy/mail guide, slim backend+frontend READMEs ([68e8133](https://github.com/hampusadamsson/golfkompis/commit/68e8133605c7d60a25431820e14133a1d44a8b4b))
+
+
+### Code Refactoring
+
+* **config:** replace two frontend URL settings with single AUTH_FRONTEND_BASE_URL ([842be98](https://github.com/hampusadamsson/golfkompis/commit/842be982604296c85b6c6c7cca367a6f19b938ad))
+
 ## [1.0.1](https://github.com/hampusadamsson/golfkompis/compare/golfkompis-v1.0.0...golfkompis-v1.0.1) (2026-04-26)
 
 

@@ -1,6 +1,6 @@
 [project]
 name = "golfkompis"
-version = "1.0.1"
+version = "1.1.0"
 description = "A system to manage golf bookings"
 
 requires-python = "==3.13.*"
