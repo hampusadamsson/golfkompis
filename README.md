@@ -6,6 +6,7 @@
 [![CI Frontend](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci-frontend.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/ci-frontend.yml)
 [![Release Please](https://github.com/hampusadamsson/golfkompis/actions/workflows/release-please.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/release-please.yml)
 [![Dependabot Updates](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/dependabot/dependabot-updates)
+[![Docker Build & Push](https://github.com/hampusadamsson/golfkompis/actions/workflows/docker.yml/badge.svg)](https://github.com/hampusadamsson/golfkompis/actions/workflows/docker.yml)
 
 Unofficial web app for searching and booking tee times at Swedish golf courses via the MinGolf platform. Includes user accounts, per-user MinGolf credential storage, and a tee-time search queue that polls on a schedule and emails you when a matching slot opens.
 
@@ -142,6 +143,8 @@ MAIL_FROM=noreply@yourdomain.tld
 
 ## Build (Docker)
 
+### Local build
+
 Build from the **repo root** (both `backend/` and `frontend/` paths are needed):
 
 ```bash
@@ -168,11 +171,19 @@ curl http://localhost:8000/health
 
 ## Deploy
 
-### Push to a registry
+### CI build & push
+
+On every push to `main` with changes to `backend/`, `frontend/`, `Dockerfile`, or `.dockerignore`, the **[docker.yml](.github/workflows/docker.yml)** workflow builds and pushes to GitHub Container Registry:
+
+```
+ghcr.io/hampusadamsson/golfkompis:latest
+ghcr.io/hampusadamsson/golfkompis:sha-<commit-sha>
+```
+
+Pull the latest image:
 
 ```bash
-docker tag golfkompis:latest ghcr.io/<owner>/golfkompis:latest
-docker push ghcr.io/<owner>/golfkompis:latest
+docker pull ghcr.io/hampusadamsson/golfkompis:latest
 ```
 
 ### Run on the host
@@ -263,7 +274,7 @@ GitHub Actions run separate pipelines for each package:
 
 - **[ci-backend](.github/workflows/ci-backend.yml)** — triggers on `backend/**` changes: ruff lint + format check → basedpyright → pytest
 - **[ci-frontend](.github/workflows/ci-frontend.yml)** — triggers on `frontend/**` changes: `pnpm check` + `pnpm lint` → `pnpm build`
-- **[docker](.github/workflows/docker.yml)** — smoke-builds the Docker image on changes to either package or the Dockerfile (no push)
+- **[docker](.github/workflows/docker.yml)** — builds and pushes the Docker image to GHCR on `main` changes (latest + sha tags)
 - **[release-please](.github/workflows/release-please.yml)** — auto-opens release PRs from Conventional Commits; tags as `backend-vX.Y.Z` and `frontend-vX.Y.Z` independently
 
 Commit prefix guide:
