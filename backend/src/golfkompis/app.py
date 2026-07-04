@@ -883,7 +883,7 @@ if _STATIC_DIR.is_dir():
     app.mount("/_app", StaticFiles(directory=_STATIC_DIR / "_app"), name="_app")
 
     @app.get("/{full_path:path}", include_in_schema=False)
-    def _spa_fallback(full_path: str) -> FileResponse:
+    def spa_fallback(full_path: str) -> FileResponse:
         candidate = _STATIC_DIR / full_path
         if candidate.is_file():
             return FileResponse(candidate)
