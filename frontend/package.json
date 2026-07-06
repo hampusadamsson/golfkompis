@@ -30,7 +30,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.2",
 		"@types/better-sqlite3": "^7.6.13",
-		"@types/node": "^24",
+		"@types/node": "^26",
 		"@vitest/browser-playwright": "^4.1.9",
 		"bits-ui": "^2.18.1",
 		"clsx": "^2.1.1",
