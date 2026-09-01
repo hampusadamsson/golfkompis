@@ -2,7 +2,7 @@ name: CI (Frontend)
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths:
       - "frontend/**"
       - ".github/workflows/ci-frontend.yml"
@@ -20,6 +20,8 @@ defaults:
 
 jobs:
   lint-and-typecheck:
+    # skip bot PRs (release-please) — their workflow runs sit in action_required forever
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +47,7 @@ jobs:
         run: pnpm lint
 
   build:
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

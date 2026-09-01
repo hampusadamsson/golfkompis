@@ -2,7 +2,7 @@ name: CI (Backend)
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths:
       - "backend/**"
       - ".github/workflows/ci-backend.yml"
@@ -20,6 +20,8 @@ defaults:
 
 jobs:
   lint-and-typecheck:
+    # skip bot PRs (release-please) — their workflow runs sit in action_required forever
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +46,7 @@ jobs:
         run: uv run basedpyright
 
   test:
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
