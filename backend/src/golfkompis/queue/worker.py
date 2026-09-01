@@ -126,6 +126,13 @@ async def _process_entry(entry: TeeTimeQueueEntry) -> None:
 
 
 def _login_sync(username: str, password: str) -> MinGolf:
+    # MOCK mode: never contact the real MinGolf platform — serve fixtures.
+    if settings.mock:
+        from golfkompis.mock_client import FakeMinGolf
+
+        fake = FakeMinGolf()
+        fake.preload()
+        return fake
     golf = MinGolf()
     golf.login(username, password)
     return golf

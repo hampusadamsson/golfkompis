@@ -74,6 +74,21 @@ All settings are read from environment variables (or a `.env` file in the repo r
 
 > In the web app, per-user MinGolf credentials are stored in the user database (not in env vars). The env vars above are only used by the CLI or for a single-user server deployment.
 
+### Test-only mode (`MOCK=1`)
+
+Set `MOCK=1` to run the app with **zero interaction with external parties** — intended for the shared dev deployment and offline demos:
+
+| Area | Behavior with `MOCK=1` |
+|-------------------|-------------------------------------------------------------------------|
+| Tee-time search | `FakeMinGolf` serves validated fixture data from `backend/src/golfkompis/fixtures/` |
+| Book / cancel | No-ops (always succeed, nothing is booked) |
+| Login / sessions | No MinGolf login; no HTTP calls to the MinGolf platform |
+| Credential saving | Saving per-user MinGolf credentials skips the real verification login — any credentials are accepted |
+| Queue worker | Searches run against fixtures instead of MinGolf |
+| Email | Unaffected — point `MAIL_*` at Mailpit (see below) to keep mail local |
+
+Fixtures are validated against the domain Pydantic models at startup, so stale fixture data fails loudly instead of at request time.
+
 ### Auth / user management
 
 | Variable                   | Default (dev)                       | Production value |
@@ -111,7 +126,11 @@ All settings are read from environment variables (or a `.env` file in the repo r
 
 ## Email
 
-### Dev — Mailpit
+### Dev deployment (cluster) — Mailpit in-cluster
+
+The `golfkompis-dev` ArgoCD application runs a Mailpit sidecar-style service in the `golfkompis-dev` namespace. The backend's `MAIL_SERVER` points at it, so verification/reset/queue emails are captured locally and never reach an external SMTP provider. The Mailpit web UI is exposed on the internal entrypoint at `mailpit.haadpi.duckdns.org:9443` — use it to read verification links and test notifications.
+
+### Dev — Mailpit (local)
 
 [Mailpit](https://github.com/axllent/mailpit) is a local SMTP catcher. All emails sent by the backend land in its web UI instead of going anywhere.
 

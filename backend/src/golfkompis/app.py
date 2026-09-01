@@ -858,7 +858,8 @@ async def patch_my_mingolf(
     if has_user != has_pass:
         raise HTTPException(status_code=422, detail="mingolf_incomplete")
 
-    if has_user and has_pass:
+    # MOCK mode: skip the real MinGolf verification login (no external calls).
+    if has_user and has_pass and not settings.mock:
         try:
             MinGolf().login(mingolf_username, mingolf_password)  # type: ignore[arg-type]
         except InvalidCredentials as e:
