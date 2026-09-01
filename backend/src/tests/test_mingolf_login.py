@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 """Unit tests for MinGolf.login() — bad-credentials and error-extraction paths."""
 
 from __future__ import annotations

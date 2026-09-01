@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import secrets
 import string
 import time as _time
 from datetime import date, timedelta
+from typing import TYPE_CHECKING
 
 import requests
 import structlog
+
+if TYPE_CHECKING:
+    from requests._types import JsonType
 
 from golfkompis.config import settings
 from golfkompis.domain import (
@@ -262,7 +268,9 @@ class MinGolf:
         alphabet = string.ascii_lowercase + string.digits
         return "".join(secrets.choice(alphabet) for _ in range(8))
 
-    def _build_self_booking_payload(self, profile: Profile) -> list[dict[str, object]]:
+    def _build_self_booking_payload(
+        self, profile: Profile
+    ) -> list[dict[str, JsonType]]:
         """Build the Bookings POST payload for the logged-in user only.
 
         Notes
@@ -276,7 +284,7 @@ class MinGolf:
         slot_booking_id = (
             f"new_{int(_time.time() * 1000)}_{self._random_8_lower_alnum()}"
         )
-        player: dict[str, object] = {
+        player: dict[str, JsonType] = {
             "personId": profile.personId,
             "golfId": profile.golfId,
             "firstName": profile.firstName,
@@ -291,7 +299,7 @@ class MinGolf:
             # assumption: hashId == personId (observed in live booking trace)
             "hashId": profile.personId,
         }
-        booker_entry: dict[str, object] = {
+        booker_entry: dict[str, JsonType] = {
             "slotBookingId": slot_booking_id,
             "state": "Added",
             "hasBeenValidated": True,

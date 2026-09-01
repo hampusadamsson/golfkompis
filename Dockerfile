@@ -1,7 +1,7 @@
 # Stage 1: build frontend
-FROM node:22-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@9
 
 WORKDIR /app/frontend
 
