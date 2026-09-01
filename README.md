@@ -291,3 +291,4 @@ Commit prefix guide:
 ## Disclaimer
 
 Golfkompis is an **unofficial** client. It is not affiliated with, endorsed by, or supported by Svenska Golfförbundet, MinGolf, or any operator of the underlying API. The MinGolf API is undocumented and may change without notice. Use at your own risk.
+# dev branch: tracks the dev deployment (dev.golfkompis.hampusadamsson.com)
