@@ -65,6 +65,7 @@
 
 	$effect(() => {
 		// Fires on mount and whenever activeTab changes
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		activeTab;
 		void load();
 	});
@@ -170,7 +171,10 @@
 
 	<!-- Error -->
 	{#if error}
-		<div class="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+		<div
+			class="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+			role="alert"
+		>
 			{error}
 		</div>
 	{/if}
@@ -197,7 +201,7 @@
 
 				<!-- Inline edit form -->
 				{#if editingEntry?.id === entry.id}
-					<div class="rounded-xl border bg-muted/30 p-4 space-y-4">
+					<div class="space-y-4 rounded-xl border bg-muted/30 p-4">
 						<p class="text-sm text-muted-foreground">
 							Datum: {formatTargetDate(entry.target_date)} (kan inte ändras)
 						</p>
@@ -213,7 +217,8 @@
 							<div class="flex flex-col gap-1.5">
 								<Label for="eq-start-{entry.id}">
 									<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
-									<span>Tidigast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
+									<span>Tidigast <span class="text-xs text-muted-foreground">(valfritt)</span></span
+									>
 								</Label>
 								<input
 									id="eq-start-{entry.id}"
@@ -253,7 +258,9 @@
 						</div>
 
 						{#if editError}
-							<div class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+							<div
+								class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+							>
 								{editError}
 							</div>
 						{/if}
@@ -262,7 +269,9 @@
 							<Button onclick={saveEdit} disabled={editSaving}>
 								{editSaving ? 'Sparar…' : 'Spara'}
 							</Button>
-							<Button variant="ghost" onclick={() => (editingEntry = null)}>Avbryt redigering</Button>
+							<Button variant="ghost" onclick={() => (editingEntry = null)}
+								>Avbryt redigering</Button
+							>
 						</div>
 					</div>
 				{/if}
@@ -272,7 +281,12 @@
 </section>
 
 <!-- Cancel confirmation dialog -->
-<AlertDialog.Root bind:open={cancelDialogOpen} onOpenChange={(v) => { if (!v) pendingCancelEntry = null; }}>
+<AlertDialog.Root
+	bind:open={cancelDialogOpen}
+	onOpenChange={(v) => {
+		if (!v) pendingCancelEntry = null;
+	}}
+>
 	<AlertDialog.Portal>
 		<AlertDialog.Overlay />
 		<AlertDialog.Content>
@@ -287,7 +301,7 @@
 			<AlertDialog.Footer>
 				<AlertDialog.Cancel onclick={() => (pendingCancelEntry = null)}>Behåll</AlertDialog.Cancel>
 				<AlertDialog.Action
-					class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					class="text-destructive-foreground bg-destructive hover:bg-destructive/90"
 					onclick={confirmCancel}
 				>
 					Avbryt sökning

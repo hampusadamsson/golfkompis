@@ -55,9 +55,9 @@
 <div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Rundor – senaste 12 månaderna</h2>
-	{#if !loading && !errorMessage}
-		<Badge variant="secondary" class="text-xs">{rounds.length} rundor</Badge>
-	{/if}
+		{#if !loading && !errorMessage}
+			<Badge variant="secondary" class="text-xs">{rounds.length} rundor</Badge>
+		{/if}
 	</div>
 
 	{#if loading}

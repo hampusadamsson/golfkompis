@@ -71,7 +71,9 @@ function buildQuery(params: object): string {
 	return str ? `?${str}` : '';
 }
 
-function createRequester(config: Required<Pick<ApiConfig, 'baseUrl' | 'fetch'>> & Pick<ApiConfig, 'onUnauthorized'>): Requester {
+function createRequester(
+	config: Required<Pick<ApiConfig, 'baseUrl' | 'fetch'>> & Pick<ApiConfig, 'onUnauthorized'>
+): Requester {
 	return async function request<T>(
 		method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
 		path: string,
@@ -166,7 +168,7 @@ export function createApiClient(config: ApiConfig = {}): ApiClient {
 	const resolved = {
 		baseUrl: config.baseUrl ?? '',
 		fetch: config.fetch ?? globalThis.fetch,
-		onUnauthorized: config.onUnauthorized ?? _globalOnUnauthorized,
+		onUnauthorized: config.onUnauthorized ?? _globalOnUnauthorized
 	};
 
 	const req = createRequester(resolved);

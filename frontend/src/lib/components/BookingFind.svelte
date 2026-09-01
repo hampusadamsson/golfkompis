@@ -9,7 +9,7 @@
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 
-	import { createApiClient, ApiError, getErrorMessage } from '$lib/api';
+	import { createApiClient, getErrorMessage } from '$lib/api';
 	import type { Slot, Course } from '$lib/api';
 	import { todayInTz, formatSlotTime, flexColorStyle } from '$lib/format';
 	import CourseMultiSelect from './CourseMultiSelect.svelte';
@@ -172,66 +172,66 @@
 
 	<!-- Controls -->
 	<div class="space-y-4">
-			<CourseMultiSelect bind:selected={courseIds} {apiBaseUrl} onChange={handleCoursesChange} />
+		<CourseMultiSelect bind:selected={courseIds} {apiBaseUrl} onChange={handleCoursesChange} />
 
-			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-				<!-- Date -->
-				<div class="flex flex-col gap-1.5">
-					<Label for="bf-date">Datum</Label>
-					<input
-						id="bf-date"
-						type="date"
-						bind:value={date}
-						min={today}
-						class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-					/>
-				</div>
-
-				<!-- Spots -->
-				<div class="flex flex-col gap-1.5">
-					<Label>Antal platser</Label>
-					<div class="flex gap-1.5">
-						{#each [1, 2, 3, 4] as n (n)}
-							<Button
-								variant={spots === n ? 'default' : 'outline'}
-								size="sm"
-								class="w-10"
-								onclick={() => (spots = n)}
-							>
-								{n}
-							</Button>
-						{/each}
-					</div>
-				</div>
+		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+			<!-- Date -->
+			<div class="flex flex-col gap-1.5">
+				<Label for="bf-date">Datum</Label>
+				<input
+					id="bf-date"
+					type="date"
+					bind:value={date}
+					min={today}
+					class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				/>
 			</div>
 
-			<!-- Optional time range -->
-			<div class="grid grid-cols-2 gap-3">
-				<div class="flex flex-col gap-1.5">
-					<Label for="bf-start" class="whitespace-nowrap">
-						<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
-						<span>Tidigast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
-					</Label>
-					<input
-						id="bf-start"
-						type="time"
-						bind:value={start}
-						class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-					/>
-				</div>
-				<div class="flex flex-col gap-1.5">
-					<Label for="bf-stop" class="whitespace-nowrap">
-						<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
-						<span>Senast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
-					</Label>
-					<input
-						id="bf-stop"
-						type="time"
-						bind:value={stop}
-						class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-					/>
+			<!-- Spots -->
+			<div class="flex flex-col gap-1.5">
+				<Label>Antal platser</Label>
+				<div class="flex gap-1.5">
+					{#each [1, 2, 3, 4] as n (n)}
+						<Button
+							variant={spots === n ? 'default' : 'outline'}
+							size="sm"
+							class="w-10"
+							onclick={() => (spots = n)}
+						>
+							{n}
+						</Button>
+					{/each}
 				</div>
 			</div>
+		</div>
+
+		<!-- Optional time range -->
+		<div class="grid grid-cols-2 gap-3">
+			<div class="flex flex-col gap-1.5">
+				<Label for="bf-start" class="whitespace-nowrap">
+					<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
+					<span>Tidigast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
+				</Label>
+				<input
+					id="bf-start"
+					type="time"
+					bind:value={start}
+					class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				/>
+			</div>
+			<div class="flex flex-col gap-1.5">
+				<Label for="bf-stop" class="whitespace-nowrap">
+					<span class="block text-xs leading-none text-muted-foreground">Starttid</span>
+					<span>Senast <span class="text-xs text-muted-foreground">(valfritt)</span></span>
+				</Label>
+				<input
+					id="bf-stop"
+					type="time"
+					bind:value={stop}
+					class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				/>
+			</div>
+		</div>
 
 		<div class="flex flex-wrap items-center gap-2">
 			<Button
@@ -263,146 +263,143 @@
 				{/if}
 			</Button>
 		</div>
-		</div>
+	</div>
 
-		{#if enqueueAlert}
-			<div
-				class="rounded-md border px-4 py-3 text-sm {enqueueAlert.kind === 'success'
-					? 'border-green-200 bg-green-50 text-green-800'
-					: 'border-destructive/30 bg-destructive/10 text-destructive'}"
-				role="alert"
-			>
-				{enqueueAlert.msg}
+	{#if enqueueAlert}
+		<div
+			class="rounded-md border px-4 py-3 text-sm {enqueueAlert.kind === 'success'
+				? 'border-green-200 bg-green-50 text-green-800'
+				: 'border-destructive/30 bg-destructive/10 text-destructive'}"
+			role="alert"
+		>
+			{enqueueAlert.msg}
+		</div>
+	{/if}
+
+	<!-- Results -->
+	<div class="mt-6">
+		{#if loading}
+			<!-- Skeletons -->
+			<div class="space-y-3">
+				{#each [0, 1, 2] as n (n)}
+					<div class="h-10 w-full animate-pulse rounded-md bg-muted"></div>
+				{/each}
+			</div>
+		{:else if searched && results.length === 0}
+			<p class="py-4 text-sm text-muted-foreground">Inga banor valda.</p>
+		{:else if results.length > 0}
+			<div class="space-y-2">
+				{#each results as result, i (result.course.CourseID)}
+					<div class="overflow-hidden rounded-xl border">
+						<!-- Course header -->
+						<button
+							type="button"
+							class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-muted/50"
+							onclick={() => toggleCourse(i)}
+							aria-expanded={result.open}
+						>
+							{#if result.open}
+								<ChevronDownIcon class="h-4 w-4 shrink-0 text-muted-foreground" />
+							{:else}
+								<ChevronRightIcon class="h-4 w-4 shrink-0 text-muted-foreground" />
+							{/if}
+							<span class="flex-1 truncate">
+								{result.course.ClubName} – {result.course.CourseName}
+							</span>
+							{#if result.error}
+								<Badge variant="destructive" class="shrink-0 text-xs">
+									<TriangleAlertIcon class="mr-1 h-3 w-3" />
+									Fel
+								</Badge>
+							{:else}
+								<Badge variant="secondary" class="shrink-0 text-xs">
+									{result.slots.filter((s) => s.availablity.availableSlots > 0).length} tider
+								</Badge>
+							{/if}
+						</button>
+
+						<!-- Expanded content -->
+						{#if result.open}
+							{#if result.error}
+								<div class="border-t px-3 py-2">
+									<p class="text-sm text-destructive">{result.error}</p>
+								</div>
+							{:else if result.slots.length === 0}
+								<div class="border-t px-3 py-2">
+									<p class="text-sm text-muted-foreground">Inga tider matchar filtren.</p>
+								</div>
+							{:else}
+								<ul class="divide-y border-t">
+									{#each result.slots as slot (slot.id)}
+										{@const bookable = slotBookable(slot)}
+										{@const fc = flexColorStyle(slot.flexColor)}
+										<li>
+											<button
+												type="button"
+												class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors {bookable
+													? 'cursor-pointer hover:bg-muted/50'
+													: 'cursor-not-allowed opacity-50'}"
+												disabled={!bookable}
+												onclick={() => bookable && (bookTarget = slot)}
+											>
+												<!-- Time -->
+												<span class="w-11 shrink-0 font-mono text-sm tabular-nums"
+													>{formatSlotTime(slot.time)}</span
+												>
+
+												<!-- Players + badges -->
+												<span class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+													{#if slot.playersInfo.length > 0}
+														<span class="truncate text-sm">{slot.playersInfo.join(', ')}</span>
+													{:else}
+														<span class="text-sm text-muted-foreground">Tom boll</span>
+													{/if}
+													{#if slot.nineHoleBookingAavailable}
+														<Badge variant="secondary" class="shrink-0 px-1 py-0 text-xs">9</Badge>
+													{/if}
+													{#if fc}
+														<span
+															class="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/10"
+															style="background-color: {fc}"
+															title="Flex: {slot.flexColor}"
+														></span>
+													{/if}
+													{#if slot.maximumHcpPerSlot !== null}
+														<Badge
+															variant="outline"
+															class="shrink-0 px-1 py-0 text-xs text-amber-600"
+														>
+															HCP ≤{slot.maximumHcpPerSlot}
+														</Badge>
+													{/if}
+												</span>
+
+												<!-- Availability + price -->
+												<span class="flex shrink-0 flex-col items-end gap-0.5">
+													<Badge
+														variant={slot.availablity.availableSlots > 0 ? 'default' : 'secondary'}
+														class="text-xs"
+													>
+														{slot.availablity.availableSlots}/{slot.availablity
+															.maxNumberOfSlotBookings}
+													</Badge>
+													{#if slot.price.greenfee !== null}
+														<span class="text-xs text-muted-foreground"
+															>{slot.price.greenfee} kr</span
+														>
+													{/if}
+												</span>
+											</button>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						{/if}
+					</div>
+				{/each}
 			</div>
 		{/if}
-
-		<!-- Results -->
-		<div class="mt-6">
-			{#if loading}
-				<!-- Skeletons -->
-				<div class="space-y-3">
-					{#each [0, 1, 2] as n (n)}
-						<div class="h-10 w-full animate-pulse rounded-md bg-muted"></div>
-					{/each}
-				</div>
-			{:else if searched && results.length === 0}
-				<p class="py-4 text-sm text-muted-foreground">Inga banor valda.</p>
-			{:else if results.length > 0}
-				<div class="space-y-2">
-					{#each results as result, i (result.course.CourseID)}
-						<div class="overflow-hidden rounded-xl border">
-							<!-- Course header -->
-							<button
-								type="button"
-								class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-muted/50"
-								onclick={() => toggleCourse(i)}
-								aria-expanded={result.open}
-							>
-								{#if result.open}
-									<ChevronDownIcon class="h-4 w-4 shrink-0 text-muted-foreground" />
-								{:else}
-									<ChevronRightIcon class="h-4 w-4 shrink-0 text-muted-foreground" />
-								{/if}
-								<span class="flex-1 truncate">
-									{result.course.ClubName} – {result.course.CourseName}
-								</span>
-								{#if result.error}
-									<Badge variant="destructive" class="shrink-0 text-xs">
-										<TriangleAlertIcon class="mr-1 h-3 w-3" />
-										Fel
-									</Badge>
-								{:else}
-									<Badge variant="secondary" class="shrink-0 text-xs">
-										{result.slots.filter((s) => s.availablity.availableSlots > 0).length} tider
-									</Badge>
-								{/if}
-							</button>
-
-							<!-- Expanded content -->
-							{#if result.open}
-								{#if result.error}
-									<div class="border-t px-3 py-2">
-										<p class="text-sm text-destructive">{result.error}</p>
-									</div>
-								{:else if result.slots.length === 0}
-									<div class="border-t px-3 py-2">
-										<p class="text-sm text-muted-foreground">Inga tider matchar filtren.</p>
-									</div>
-								{:else}
-									<ul class="divide-y border-t">
-										{#each result.slots as slot (slot.id)}
-											{@const bookable = slotBookable(slot)}
-											{@const fc = flexColorStyle(slot.flexColor)}
-											<li>
-												<button
-													type="button"
-													class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors {bookable
-														? 'cursor-pointer hover:bg-muted/50'
-														: 'cursor-not-allowed opacity-50'}"
-													disabled={!bookable}
-													onclick={() => bookable && (bookTarget = slot)}
-												>
-													<!-- Time -->
-													<span class="w-11 shrink-0 font-mono text-sm tabular-nums"
-														>{formatSlotTime(slot.time)}</span
-													>
-
-													<!-- Players + badges -->
-													<span class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-														{#if slot.playersInfo.length > 0}
-															<span class="truncate text-sm">{slot.playersInfo.join(', ')}</span>
-														{:else}
-															<span class="text-sm text-muted-foreground">Tom boll</span>
-														{/if}
-														{#if slot.nineHoleBookingAavailable}
-															<Badge variant="secondary" class="shrink-0 px-1 py-0 text-xs">9</Badge
-															>
-														{/if}
-														{#if fc}
-															<span
-																class="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/10"
-																style="background-color: {fc}"
-																title="Flex: {slot.flexColor}"
-															></span>
-														{/if}
-														{#if slot.maximumHcpPerSlot !== null}
-															<Badge
-																variant="outline"
-																class="shrink-0 px-1 py-0 text-xs text-amber-600"
-															>
-																HCP ≤{slot.maximumHcpPerSlot}
-															</Badge>
-														{/if}
-													</span>
-
-													<!-- Availability + price -->
-													<span class="flex shrink-0 flex-col items-end gap-0.5">
-														<Badge
-															variant={slot.availablity.availableSlots > 0
-																? 'default'
-																: 'secondary'}
-															class="text-xs"
-														>
-															{slot.availablity.availableSlots}/{slot.availablity
-																.maxNumberOfSlotBookings}
-														</Badge>
-														{#if slot.price.greenfee !== null}
-															<span class="text-xs text-muted-foreground"
-																>{slot.price.greenfee} kr</span
-															>
-														{/if}
-													</span>
-												</button>
-											</li>
-										{/each}
-									</ul>
-								{/if}
-							{/if}
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</div>
+	</div>
 </section>
 
 <BookSlotDialog

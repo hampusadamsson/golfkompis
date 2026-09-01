@@ -44,7 +44,10 @@ export function users(req: Requester) {
 		patchMe(body: UserUpdate): Promise<AppUser> {
 			return req('PATCH', '/users/me', { body });
 		},
-		patchMyMingolf(body: { mingolf_username: string | null; mingolf_password: string | null }): Promise<AppUser> {
+		patchMyMingolf(body: {
+			mingolf_username: string | null;
+			mingolf_password: string | null;
+		}): Promise<AppUser> {
 			return req<AppUser>('PATCH', '/users/me/mingolf', { body });
 		},
 		deleteMe(): Promise<void> {

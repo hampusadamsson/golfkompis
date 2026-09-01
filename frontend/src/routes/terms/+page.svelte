@@ -116,9 +116,9 @@
 	<section class="mb-8">
 		<h2 class="mb-3 text-lg font-semibold">Force majeure</h2>
 		<p class="text-muted-foreground">
-			Vi ansvarar inte för avbrott eller fel som beror på omständigheter utanför vår rimliga kontroll,
-			inklusive men inte begränsat till driftstörningar hos tredje part, internetleverantörer,
-			strömavbrott, cyberattacker eller myndighetsbeslut.
+			Vi ansvarar inte för avbrott eller fel som beror på omständigheter utanför vår rimliga
+			kontroll, inklusive men inte begränsat till driftstörningar hos tredje part,
+			internetleverantörer, strömavbrott, cyberattacker eller myndighetsbeslut.
 		</p>
 	</section>
 
@@ -130,8 +130,8 @@
 			GDPR artikel 6.1.b.
 		</p>
 		<p class="text-muted-foreground">
-			Du kan begära radering av ditt konto när som helst genom att kontakta oss. Vid radering raderas
-			även dina personuppgifter i enlighet med gällande dataskyddslagstiftning.
+			Du kan begära radering av ditt konto när som helst genom att kontakta oss. Vid radering
+			raderas även dina personuppgifter i enlighet med gällande dataskyddslagstiftning.
 		</p>
 	</section>
 

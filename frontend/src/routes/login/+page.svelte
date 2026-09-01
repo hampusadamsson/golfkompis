@@ -63,7 +63,9 @@
 	<form class="flex flex-col gap-4" onsubmit={handleSubmit}>
 		{#if justVerified}
 			<Alert>
-				<AlertDescription>E-postadressen är verifierad. Logga in för att fortsätta.</AlertDescription>
+				<AlertDescription
+					>E-postadressen är verifierad. Logga in för att fortsätta.</AlertDescription
+				>
 			</Alert>
 		{/if}
 		{#if notVerified}
@@ -82,8 +84,8 @@
 							}
 							notVerified = false;
 							errorMessage = 'En ny verifieringslänk har skickats.';
-						}}
-					>skicka ny länk</button>.
+						}}>skicka ny länk</button
+					>.
 				</AlertDescription>
 			</Alert>
 		{/if}

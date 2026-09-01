@@ -97,8 +97,7 @@ export function getErrorMessage(
 		network: 'Kunde inte nå servern. Kontrollera din anslutning.',
 		upstream: 'MinGolf är inte tillgängligt just nu. Försök igen senare.',
 		not_found: 'Hittades inte.',
-		mingolf_not_linked:
-			'MinGolf-konto är inte kopplat. Koppla det under Konto-sidan.',
+		mingolf_not_linked: 'MinGolf-konto är inte kopplat. Koppla det under Konto-sidan.',
 		conflict: 'Tiden bokades precis. Försök med en annan.',
 		bad_request: 'Ogiltig förfrågan.',
 		validation: 'Valideringsfel.',

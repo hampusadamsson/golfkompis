@@ -73,8 +73,8 @@
 				username: username || null,
 				full_name: fullName || null
 			});
-		currentUser.set(updated);
-		showSaveSuccess();
+			currentUser.set(updated);
+			showSaveSuccess();
 		} catch (err) {
 			saveError = getErrorMessage(err, {
 				conflict: 'Användarnamnet är redan taget.',
@@ -120,8 +120,8 @@
 		try {
 			const api = createApiClient();
 			const updated = await api.patchMyMingolf({ mingolf_username: null, mingolf_password: null });
-		currentUser.set(updated);
-		mingolfProfile.clear();
+			currentUser.set(updated);
+			mingolfProfile.clear();
 		} catch (err) {
 			mingolfError = getErrorMessage(err, { unauthorized: 'Du är inte inloggad.' });
 		} finally {

@@ -14,7 +14,7 @@
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 	import CheckIcon from '@lucide/svelte/icons/check';
 
-	import { createApiClient, ApiError, getErrorMessage } from '$lib/api';
+	import { createApiClient, getErrorMessage } from '$lib/api';
 	import type { Slot, Course } from '$lib/api';
 	import { formatDateLong, formatSlotTime, flexColorStyle } from '$lib/format';
 

@@ -30,7 +30,7 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
 		minors: [],
 		memberClubs: [
 			{ isHomeClub: true, id: 'c1', name: 'Stockholms GK' },
-			{ isHomeClub: false, id: 'c2', name: 'Lidingö GK' },
+			{ isHomeClub: false, id: 'c2', name: 'Lidingö GK' }
 		],
 		caregiverPersonId: null,
 		caregiverGolfId: null,
@@ -54,7 +54,7 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
 		showPersonInfoView: false,
 		isForeign: false,
 		country: null,
-		...overrides,
+		...overrides
 	} as unknown as Profile;
 }
 

@@ -96,9 +96,9 @@
 <div class="w-full rounded-xl border p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-semibold">Kommande bokningar</h2>
-	{#if !loading && !errorMessage}
-		<Badge variant="secondary" class="text-xs">{upcoming.length} bokningar</Badge>
-	{/if}
+		{#if !loading && !errorMessage}
+			<Badge variant="secondary" class="text-xs">{upcoming.length} bokningar</Badge>
+		{/if}
 	</div>
 
 	{#if loading}

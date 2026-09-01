@@ -8,13 +8,13 @@ const fakeProfile = {
 	lastName: 'Svensson',
 	email: 'anna@golf.se',
 	hcp: 12.0,
-	clubMemberships: [],
+	clubMemberships: []
 } as unknown as Profile;
 
 function makeApi(override: Partial<ApiClient> = {}): ApiClient {
 	return {
 		getProfile: vi.fn().mockResolvedValue(fakeProfile),
-		...override,
+		...override
 	} as unknown as ApiClient;
 }
 
@@ -29,7 +29,7 @@ describe('MinGolfProfileStore', () => {
 
 	it('load() sets error on failure', async () => {
 		const api = makeApi({
-			getProfile: vi.fn().mockRejectedValue(new Error('network error')),
+			getProfile: vi.fn().mockRejectedValue(new Error('network error'))
 		});
 		const store = new MinGolfProfileStore();
 		await store.load(api);

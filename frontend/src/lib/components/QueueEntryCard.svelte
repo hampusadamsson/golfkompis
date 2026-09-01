@@ -51,14 +51,14 @@
 	);
 </script>
 
-<div class="rounded-xl border p-4 space-y-3">
+<div class="space-y-3 rounded-xl border p-4">
 	<!-- Row 1: date + status badge -->
 	<div class="flex items-center justify-between gap-2">
 		<span class="font-semibold">{formatTargetDate(entry.target_date)}</span>
 		{#if entry.status === 'active'}
 			<Badge variant="secondary">Aktiv</Badge>
 		{:else if entry.status === 'matched'}
-			<Badge class="bg-green-100 text-green-800 border-green-200">Matchad</Badge>
+			<Badge class="border-green-200 bg-green-100 text-green-800">Matchad</Badge>
 		{:else if entry.status === 'expired'}
 			<Badge variant="destructive">Utgången</Badge>
 		{:else}
@@ -83,7 +83,9 @@
 
 	<!-- Row 4: footer -->
 	<div class="text-xs text-muted-foreground">
-		Kontrollerad: {formatChecked(entry.last_checked_at)}{#if entry.check_count > 0}&ensp;({entry.check_count} kontroller){/if}
+		Kontrollerad: {formatChecked(
+			entry.last_checked_at
+		)}{#if entry.check_count > 0}&ensp;({entry.check_count} kontroller){/if}
 	</div>
 
 	<!-- Row 5: matched slots (collapsible) -->
@@ -108,18 +110,30 @@
 						<li>
 							<button
 								type="button"
-								class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50 {slot.availablity.bookable && !slot.isLocked ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}"
+								class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50 {slot
+									.availablity.bookable && !slot.isLocked
+									? 'cursor-pointer'
+									: 'cursor-not-allowed opacity-50'}"
 								disabled={!slot.availablity.bookable || slot.isLocked}
-								onclick={() => { if (slot.availablity.bookable && !slot.isLocked) bookTarget = slot; }}
+								onclick={() => {
+									if (slot.availablity.bookable && !slot.isLocked) bookTarget = slot;
+								}}
 							>
-								<span class="w-11 shrink-0 font-mono tabular-nums">{formatSlotTime(slot.time)}</span>
+								<span class="w-11 shrink-0 font-mono tabular-nums">{formatSlotTime(slot.time)}</span
+								>
 								<span class="flex flex-1 items-center gap-1.5">
 									{#if fc}
-										<span class="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10" style="background-color: {fc}"></span>
+										<span
+											class="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
+											style="background-color: {fc}"
+										></span>
 									{/if}
 								</span>
 								<span class="flex shrink-0 flex-col items-end gap-0.5">
-									<Badge variant={slot.availablity.availableSlots > 0 ? 'default' : 'secondary'} class="text-xs">
+									<Badge
+										variant={slot.availablity.availableSlots > 0 ? 'default' : 'secondary'}
+										class="text-xs"
+									>
 										{slot.availablity.availableSlots}/{slot.availablity.maxNumberOfSlotBookings}
 									</Badge>
 									{#if slot.price.greenfee !== null}
@@ -154,5 +168,7 @@
 	bind:slot={bookTarget}
 	date={entry.target_date}
 	{apiBaseUrl}
-	onBooked={() => { bookTarget = null; }}
+	onBooked={() => {
+		bookTarget = null;
+	}}
 />

@@ -201,7 +201,9 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:locale" content="sv_SE" />
 	<meta name="theme-color" content="#ffffff" />
+	<!-- eslint-disable-next-line no-useless-escape -->
 	{@html `<script type="application/ld+json">${JSON.stringify(orgSchema)}<\/script>`}
+	<!-- eslint-disable-next-line no-useless-escape -->
 	{@html `<script type="application/ld+json">${JSON.stringify(faqSchema)}<\/script>`}
 </svelte:head>
 
@@ -282,9 +284,7 @@
 		<div class="grid gap-6 sm:grid-cols-3">
 			{#each features as feature (feature.title)}
 				<Card
-					class="transition-shadow hover:shadow-md {feature.primary
-						? 'border-foreground/20'
-						: ''}"
+					class="transition-shadow hover:shadow-md {feature.primary ? 'border-foreground/20' : ''}"
 				>
 					<CardHeader>
 						<div class="mb-2 flex items-start justify-between">
@@ -351,7 +351,7 @@
 						<div>
 							<p class="mb-2 text-xs font-medium text-muted-foreground">Klubbar</p>
 							<div class="flex flex-wrap gap-2">
-								{#each ['Bro Hof Slott', 'Ullna GK', 'Kungsängen GC', '+ 2 till'] as course}
+								{#each ['Bro Hof Slott', 'Ullna GK', 'Kungsängen GC', '+ 2 till'] as course (course)}
 									<Badge variant="secondary">{course}</Badge>
 								{/each}
 							</div>
@@ -395,9 +395,9 @@
 					>
 						<CardContent class="flex flex-col gap-3 p-4">
 							<div class="flex items-start justify-between gap-2">
-								<div class="space-y-1.5 flex-1">
+								<div class="flex-1 space-y-1.5">
 									<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-										<span class="font-medium text-sm">{q.date}</span>
+										<span class="text-sm font-medium">{q.date}</span>
 										<span class="text-xs text-muted-foreground">{q.window}</span>
 									</div>
 									<p class="text-xs text-muted-foreground">{q.spots} spelare</p>

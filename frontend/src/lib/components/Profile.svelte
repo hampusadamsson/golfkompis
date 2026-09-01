@@ -24,15 +24,12 @@
 		<header class="flex items-center gap-4">
 			<Avatar class="size-16">
 				{#if profile.imageUrl}
-					<AvatarImage
-						src={profile.imageUrl}
-						alt="{profile.firstName} {profile.lastName}"
-					/>
+					<AvatarImage src={profile.imageUrl} alt="{profile.firstName} {profile.lastName}" />
 				{/if}
 				<AvatarFallback>{initials}</AvatarFallback>
 			</Avatar>
 			<div class="flex flex-col gap-1">
-				<h2 class="text-xl font-semibold leading-tight">
+				<h2 class="text-xl leading-tight font-semibold">
 					{profile.firstName}
 					{profile.lastName}
 				</h2>

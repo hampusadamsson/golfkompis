@@ -39,6 +39,12 @@ export default defineConfig(
 	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// rules introduced by eslint-plugin-svelte upgrades; not yet adhered to by the codebase
+			'svelte/no-navigation-without-resolve': 'off',
+			'svelte/prefer-writable-derived': 'off',
+			// JSON-LD schema snippets on Landing are intentionally rendered as html
+			'svelte/no-at-html-tags': 'off'
+		}
 	}
 );

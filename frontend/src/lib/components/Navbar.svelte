@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
-	import {
-		Sheet,
-		SheetContent,
-		SheetTrigger,
-		SheetClose
-	} from '$lib/components/ui/sheet';
+	import { Sheet, SheetContent, SheetTrigger, SheetClose } from '$lib/components/ui/sheet';
 	import { createApiClient } from '$lib/api';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte';
@@ -111,14 +106,21 @@
 							<a
 								href="/profile/account"
 								onclick={() => (mobileOpen = false)}
-								class="flex w-full rounded-md px-3 py-2 text-base font-medium {page.url.pathname.startsWith('/profile/account') ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'} transition-colors"
+								class="flex w-full rounded-md px-3 py-2 text-base font-medium {page.url.pathname.startsWith(
+									'/profile/account'
+								)
+									? 'bg-muted text-foreground'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground'} transition-colors"
 							>
 								{currentUser.user?.username ?? currentUser.user?.email}
 							</a>
 						</SheetClose>
 						<SheetClose>
 							<button
-								onclick={() => { mobileOpen = false; handleAppLogout(); }}
+								onclick={() => {
+									mobileOpen = false;
+									handleAppLogout();
+								}}
 								class="flex w-full rounded-md px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 							>
 								Logga ut

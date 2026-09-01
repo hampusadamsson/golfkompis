@@ -39,7 +39,9 @@
 
 	{#if success}
 		<Alert>
-			<AlertDescription>Din e-postadress är verifierad! Logga in för att fortsätta.</AlertDescription>
+			<AlertDescription
+				>Din e-postadress är verifierad! Logga in för att fortsätta.</AlertDescription
+			>
 		</Alert>
 		<div class="mt-4">
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
