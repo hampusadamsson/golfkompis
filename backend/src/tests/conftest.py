@@ -9,7 +9,7 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def mock_mail_send() -> Generator[None, None, None]:
+def mock_mail_send() -> Generator:
     """Prevent fastapi-mail from attempting real SMTP connections in tests."""
     with patch(
         "golfkompis.users.email._fm.send_message",
