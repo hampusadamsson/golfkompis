@@ -53,6 +53,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_register(
         self, user: User, request: Request | None = None
     ) -> None:
+        # MOCK mode (test-only dev deployment): no email is sent and the account
+        # is verified immediately, so agents and judges can use the full tool
+        # surface without access to the internal Mailpit catcher.
+        if settings.mock:
+            await self.user_db.update(user, {"is_verified": True})
+            return
         await self.request_verify(user, request)
 
     async def on_after_forgot_password(

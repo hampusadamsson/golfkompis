@@ -66,11 +66,11 @@ All settings are read from environment variables (or a `.env` file in the repo r
 
 ### MinGolf
 
-| Variable            | Default | Description |
-|---------------------|---------|-------------|
-| `MINGOLF_USERNAME`  | —       | Golf-ID, format `YYMMDD-XXX`. Required for real MinGolf calls. |
-| `MINGOLF_PASSWORD`  | —       | MinGolf password. |
-| `MOCK`              | `false` | Set `1` to serve fixture data instead of calling MinGolf. |
+| Variable           | Default | Description                                                    |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| `MINGOLF_USERNAME` | —       | Golf-ID, format `YYMMDD-XXX`. Required for real MinGolf calls. |
+| `MINGOLF_PASSWORD` | —       | MinGolf password.                                              |
+| `MOCK`             | `false` | Set `1` to serve fixture data instead of calling MinGolf.      |
 
 > In the web app, per-user MinGolf credentials are stored in the user database (not in env vars). The env vars above are only used by the CLI or for a single-user server deployment.
 
@@ -78,49 +78,77 @@ All settings are read from environment variables (or a `.env` file in the repo r
 
 Set `MOCK=1` to run the app with **zero interaction with external parties** — intended for the shared dev deployment and offline demos:
 
-| Area | Behavior with `MOCK=1` |
-|-------------------|-------------------------------------------------------------------------|
-| Tee-time search | `FakeMinGolf` serves validated fixture data from `backend/src/golfkompis/fixtures/` |
-| Book / cancel | No-ops (always succeed, nothing is booked) |
-| Login / sessions | No MinGolf login; no HTTP calls to the MinGolf platform |
+| Area              | Behavior with `MOCK=1`                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Tee-time search   | `FakeMinGolf` serves validated fixture data from `backend/src/golfkompis/fixtures/`                  |
+| Book / cancel     | No-ops (always succeed, nothing is booked)                                                           |
+| Login / sessions  | No MinGolf login; no HTTP calls to the MinGolf platform                                              |
 | Credential saving | Saving per-user MinGolf credentials skips the real verification login — any credentials are accepted |
-| Queue worker | Searches run against fixtures instead of MinGolf |
-| Email | Unaffected — point `MAIL_*` at Mailpit (see below) to keep mail local |
+| Queue worker      | Searches run against fixtures instead of MinGolf                                                     |
+| Email             | Unaffected — point `MAIL_*` at Mailpit (see below) to keep mail local                                |
 
 Fixtures are validated against the domain Pydantic models at startup, so stale fixture data fails loudly instead of at request time.
 
 ### Auth / user management
 
-| Variable                   | Default (dev)                       | Production value |
-|----------------------------|-------------------------------------|------------------|
-| `AUTH_SECRET`              | `changeme-replace-in-production`    | Random 32+ char string |
-| `AUTH_DATABASE_URL`        | `sqlite+aiosqlite:///./users.db`    | Absolute path, e.g. `sqlite+aiosqlite:////data/users.db` |
-| `AUTH_COOKIE_SECURE`       | `false`                             | `true` |
-| `AUTH_FRONTEND_BASE_URL`   | `http://localhost:5173`             | `https://golfkompis.example.com` |
+| Variable                 | Default (dev)                    | Production value                                         |
+| ------------------------ | -------------------------------- | -------------------------------------------------------- |
+| `AUTH_SECRET`            | `changeme-replace-in-production` | Random 32+ char string                                   |
+| `AUTH_DATABASE_URL`      | `sqlite+aiosqlite:///./users.db` | Absolute path, e.g. `sqlite+aiosqlite:////data/users.db` |
+| `AUTH_COOKIE_SECURE`     | `false`                          | `true`                                                   |
+| `AUTH_FRONTEND_BASE_URL` | `http://localhost:5173`          | `https://golfkompis.example.com`                         |
 
 `AUTH_FRONTEND_BASE_URL` is the only URL you need to set — `/verify` and `/reset-password` paths are derived from it automatically.
 
 ### Email
 
-| Variable        | Default (dev, Mailpit) | Production (smtp2go) |
-|-----------------|------------------------|----------------------|
+| Variable        | Default (dev, Mailpit) | Production (smtp2go)     |
+| --------------- | ---------------------- | ------------------------ |
 | `MAIL_FROM`     | `noreply@example.com`  | `noreply@yourdomain.tld` |
-| `MAIL_SERVER`   | `localhost`            | `mail.smtp2go.com` |
-| `MAIL_PORT`     | `1025`                 | `2525` |
-| `MAIL_STARTTLS` | `false`                | `true` |
-| `MAIL_SSL_TLS`  | `false`                | `false` |
-| `MAIL_USERNAME` | _(empty)_              | smtp2go SMTP username |
-| `MAIL_PASSWORD` | _(empty)_              | smtp2go API password |
+| `MAIL_SERVER`   | `localhost`            | `mail.smtp2go.com`       |
+| `MAIL_PORT`     | `1025`                 | `2525`                   |
+| `MAIL_STARTTLS` | `false`                | `true`                   |
+| `MAIL_SSL_TLS`  | `false`                | `false`                  |
+| `MAIL_USERNAME` | _(empty)_              | smtp2go SMTP username    |
+| `MAIL_PASSWORD` | _(empty)_              | smtp2go API password     |
 
 ### Queue
 
-| Variable                       | Default | Description |
-|--------------------------------|---------|-------------|
-| `QUEUE_ENABLED`                | `true`  | Enable the background tee-time search worker. |
-| `QUEUE_POLL_INTERVAL_MINUTES`  | `60`    | How often the worker checks active queue entries. |
-| `QUEUE_ACTIVE_WINDOW_START`    | `08:00` | Earliest time of day the worker will run (Stockholm). |
-| `QUEUE_ACTIVE_WINDOW_STOP`     | `23:00` | Latest time of day the worker will run (Stockholm). |
-| `QUEUE_EMAIL_MAX_SLOTS`        | `20`    | Max number of matching slots included in the match email. |
+| Variable                      | Default | Description                                               |
+| ----------------------------- | ------- | --------------------------------------------------------- |
+| `QUEUE_ENABLED`               | `true`  | Enable the background tee-time search worker.             |
+| `QUEUE_POLL_INTERVAL_MINUTES` | `60`    | How often the worker checks active queue entries.         |
+| `QUEUE_ACTIVE_WINDOW_START`   | `08:00` | Earliest time of day the worker will run (Stockholm).     |
+| `QUEUE_ACTIVE_WINDOW_STOP`    | `23:00` | Latest time of day the worker will run (Stockholm).       |
+| `QUEUE_EMAIL_MAX_SLOTS`       | `20`    | Max number of matching slots included in the match email. |
+
+---
+
+## WebMCP — agent tools
+
+Golfkompis is a [WebMCP](https://developer.chrome.com/docs/ai/webmcp) app: the frontend registers structured tools on `document.modelContext` so AI agents (ChatGPT's in-app browser, or Chrome 149+ with `chrome://flags/#enable-webmcp-testing`) can search tee times, book, cancel and manage tee-time watches directly — no DOM scraping, no guesswork.
+
+Registered tools:
+
+| Tool                 | Auth | Description                                                                               |
+| -------------------- | ---- | ----------------------------------------------------------------------------------------- |
+| `list_courses`       | —    | Search the Swedish club/course catalogue (`course_id`)                                    |
+| `search_tee_times`   | —    | Search available tee times by date + club names, with availability and prices (`slot_id`) |
+| `get_my_bookings`    | ✅   | List upcoming bookings (`booking_id`)                                                     |
+| `book_teetime`       | ✅   | Book a slot by `slot_id`                                                                  |
+| `cancel_booking`     | ✅   | Cancel a booking by `booking_id`                                                          |
+| `add_queue_watch`    | ✅   | Watch a date/clubs/time window; email notification when a slot opens                      |
+| `list_queue_watches` | ✅   | List active watches (`watch_id`)                                                          |
+| `remove_queue_watch` | ✅   | Delete a watch                                                                            |
+
+Implementation notes:
+
+- Tools live in `frontend/src/lib/webmcp.ts` and call the same typed API layer as the UI (`$lib/api`), so agents get exactly the same behavior, auth and error handling as human users.
+- Tool execution runs in the page with the user's session — nothing is exposed cross-origin (`annotations.readOnlyHint` marks read-only tools; mutating tools ask the agent to confirm with the user first).
+- Course names from an agent are fuzzy-resolved against the bundled catalogue (diacritics-insensitive, substring match) before hitting the API.
+- In `MOCK=1` deployments (dev), all tools run on fixture data and `book_teetime`/`cancel_booking` are no-ops — safe for demos. Registration there auto-verifies accounts (no email needed).
+
+Try it: open the app in ChatGPT's in-app browser and ask "find me a tee time at Backa Säteri next Tuesday morning" — the agent calls `list_courses` and `search_tee_times` directly.
 
 ---
 
@@ -298,16 +326,17 @@ GitHub Actions run separate pipelines for each package:
 
 Commit prefix guide:
 
-| Prefix | Version bump |
-|--------|-------------|
-| `fix:` | patch |
-| `feat:` | minor |
-| `feat!:` / `BREAKING CHANGE:` | major |
-| `chore:`, `test:`, `ci:` | no changelog entry |
+| Prefix                        | Version bump       |
+| ----------------------------- | ------------------ |
+| `fix:`                        | patch              |
+| `feat:`                       | minor              |
+| `feat!:` / `BREAKING CHANGE:` | major              |
+| `chore:`, `test:`, `ci:`      | no changelog entry |
 
 ---
 
 ## Disclaimer
 
 Golfkompis is an **unofficial** client. It is not affiliated with, endorsed by, or supported by Svenska Golfförbundet, MinGolf, or any operator of the underlying API. The MinGolf API is undocumented and may change without notice. Use at your own risk.
+
 # dev branch: tracks the dev deployment (dev.golfkompis.hampusadamsson.com)

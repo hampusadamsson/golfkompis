@@ -4,6 +4,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { createApiClient, setGlobalOnUnauthorized } from '$lib/api';
+	import { registerWebMCPTools } from '$lib/webmcp';
 	import { currentUser } from '$lib/auth/currentUser.svelte';
 	import { mingolfProfile } from '$lib/auth/mingolfProfile.svelte.js';
 	import { goto } from '$app/navigation';
@@ -39,6 +40,10 @@
 			.catch(() => {
 				// not logged in — leave currentUser.user as null
 			});
+
+		// Expose Golfkompis capabilities to AI agents (WebMCP). Progressive
+		// enhancement: no-ops in browsers without document.modelContext.
+		void registerWebMCPTools();
 	});
 </script>
 
