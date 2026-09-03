@@ -169,13 +169,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     app.state.app_state = state
 
     if settings.mock:
-        from golfkompis.mock_client import FakeMinGolf
+        from golfkompis.mock_client import get_mock_client
 
         log = structlog.get_logger()  # pyright: ignore[reportAny]
-        fake = FakeMinGolf()
-        fake.preload()
+        fake = get_mock_client()
         app.dependency_overrides[get_authenticated_client] = lambda: fake
-        log.info("mock mode enabled — returning fixture data, auth bypassed")  # pyright: ignore[reportAny]
+        log.info("mock mode enabled — fixture data, stateful bookings, auth bypassed")  # pyright: ignore[reportAny]
 
     worker_task: asyncio.Task[None] | None = None
     stop_event = asyncio.Event()
@@ -549,6 +548,8 @@ def book(golf: GolfClient, body: BookingRequest) -> None:
     """
     try:
         golf.book_teetime(body.slot_id)
+    except BookingNotFound as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except requests.HTTPError as e:
         if e.response is not None and 400 <= e.response.status_code < 500:
             raise HTTPException(status_code=409, detail=f"Booking conflict: {e}") from e

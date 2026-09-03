@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     mingolf_password: str = ""
     default_range_weeks: int = 10
     mock: bool = False
+    # Optional JSON file for FakeMinGolf state (mock bookings survive restarts).
+    # Point at a PVC-mounted path in the dev deployment, e.g. /db/mock-state.json.
+    mock_state_path: str = ""
     session_ttl_minutes: int = 30
     session_cache_max: int = 256
 

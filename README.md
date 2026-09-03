@@ -80,11 +80,12 @@ Set `MOCK=1` to run the app with **zero interaction with external parties** — 
 
 | Area              | Behavior with `MOCK=1`                                                                               |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| Tee-time search   | `FakeMinGolf` serves validated fixture data from `backend/src/golfkompis/fixtures/`                  |
-| Book / cancel     | No-ops (always succeed, nothing is booked)                                                           |
+| Tee-time search   | `FakeMinGolf` generates deterministic tee-time sheets per course and date: 05:00-20:00 Europe/Stockholm, every 20 min, varying availability, greenfees, occasional locked slots |
+| Book / cancel     | **Stateful**: booking records a booking and fills the slot (re-search shows it taken), re-booking conflicts (409), cancelling frees it. Seeded demo bookings + round history included |
+| Persistence       | Mock bookings survive restarts via `MOCK_STATE_PATH` (JSON file, point at a PVC path in dev; in-memory only when unset) |
 | Login / sessions  | No MinGolf login; no HTTP calls to the MinGolf platform                                              |
 | Credential saving | Saving per-user MinGolf credentials skips the real verification login — any credentials are accepted |
-| Queue worker      | Searches run against fixtures instead of MinGolf                                                     |
+| Queue worker      | Searches run against generated schedules — watches on future dates genuinely match and trigger emails |
 | Email             | Unaffected — point `MAIL_*` at Mailpit (see below) to keep mail local                                |
 
 Fixtures are validated against the domain Pydantic models at startup, so stale fixture data fails loudly instead of at request time.
