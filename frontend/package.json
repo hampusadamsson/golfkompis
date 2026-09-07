@@ -31,7 +31,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/better-sqlite3": "^7.6.13",
-		"@types/node": "^24.13.3",
+		"@types/node": "^26.4.1",
 		"@vitest/browser-playwright": "^4.1.11",
 		"bits-ui": "^2.19.0",
 		"clsx": "^2.1.1",
